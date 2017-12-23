@@ -2,6 +2,7 @@ import React from 'react';
 import Repo from "../models/Repo.js";
 import RepoController from "../lib/RepoController.js";
 import BridgeManager from "../lib/BridgeManager.js";
+import PackageView from "./PackageView";
 
 export default class RepoView extends React.Component {
 
@@ -40,18 +41,7 @@ export default class RepoView extends React.Component {
         <p>Packages:</p>
         <div>
           {this.state.packages.map((p, index) =>
-            <div key={index}>
-              <p><strong>{p.name}</strong></p>
-
-              <button onClick={() => this.togglePackageInstallation(p)}>
-                {BridgeManager.get().isPackageInstalledHosted(p) ? "Uninstall Hosted" : "Install Hosted"}
-              </button>
-
-              <button onClick={() => this.togglePackageLocalInstallation(p)}>
-                {BridgeManager.get().isPackageInstalledLocal(p) ? "Uninstall Offline" : "Install Offline"}
-              </button>
-
-            </div>
+            <PackageView key={index} packageInfo={p} />
           )}
         </div>
       </div>

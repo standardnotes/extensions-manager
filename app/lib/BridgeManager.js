@@ -68,6 +68,10 @@ export default class BridgeManager {
     this.updateObservers.splice(this.updateObservers.indexOf(observer), 1);
   }
 
+  isPackageInstalled(aPackage) {
+    return this.isPackageInstalledHosted(aPackage) || this.isPackageInstalledLocal(aPackage);
+  }
+
   isPackageInstalledHosted(aPackage) {
     return this.items.filter((item) => {
       return !item.deleted && !item.content.local && item.content.package_info
@@ -86,7 +90,7 @@ export default class BridgeManager {
 
   itemForPackage(aPackage, local) {
     return this.items.filter((item) => {
-      return item.content.package_info 
+      return item.content.package_info
       && item.content.package_info.identifier == aPackage.identifier
       && item.content.local == local
     })[0];
@@ -131,6 +135,11 @@ export default class BridgeManager {
     let item = this.itemForPackage(aPackage, true);
     console.log("Uninstalling offline", item);
     this.componentManager.deleteItem(item);
+  }
+
+  sendOpenEvent(aPackage) {
+    let component = this.itemForPackage(aPackage);
+    this.componentManager.sendCustomEvent("open-component", component);
   }
 
 }
