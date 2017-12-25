@@ -2,25 +2,13 @@ import React from 'react';
 import Repo from "../models/Repo.js";
 import RepoController from "../lib/RepoController.js";
 import BridgeManager from "../lib/BridgeManager.js";
+var compareVersions = require('compare-versions');
 
 export default class PackageView extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {packageInfo: props.packageInfo};
-  }
-
-  get installationInfo() {
-    let installedHosted = BridgeManager.get().isPackageInstalledHosted(this.packageInfo);
-    let installedLocal = BridgeManager.get().isPackageInstalledLocal(this.packageInfo);
-    return {
-      installedHosted: installedHosted,
-      installedLocal: installedLocal
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-
   }
 
   get packageInfo() {
@@ -47,31 +35,52 @@ export default class PackageView extends React.Component {
     BridgeManager.get().sendOpenEvent(this.packageInfo);
   }
 
+  updateComponent = () => {
+    BridgeManager.get().installPackageOffline(this.packageInfo);
+  }
+
   render() {
     let p = this.state.packageInfo;
-    let status = this.installationInfo;
-    let component = BridgeManager.get().itemForPackage(p);
-    let installed = status.installedHosted || status.installedLocal;
+    let hostedComponent = BridgeManager.get().itemForPackage(p, false);
+    let localComponent = BridgeManager.get().itemForPackage(p, true);
+    let installed = hostedComponent || localComponent;
     let hasLocalOption = p.download_url != null;
-    let showOpenOption = installed && component && ["rooms", "modal"].includes(component.content.area);
+    let showOpenOption = installed && ["rooms", "modal"].includes((hostedComponent || localComponent).content.area);
+    var updateAvailable = false, installedVersion;
+
+    if(localComponent) {
+      installedVersion = localComponent.content.package_info.version;
+      updateAvailable = compareVersions(p.version, installedVersion) == 1;
+    }
 
     return (
       <div>
         <p><strong>{p.name}</strong></p>
+        <p>Latest Version: {p.version}</p>
+
+        {localComponent &&
+          <p>Installed Version: {installedVersion}</p>
+        }
 
         <button onClick={this.togglePackageInstallation}>
-          {status.installedHosted ? "Uninstall" : "Install"}
+          {hostedComponent ? "Uninstall" : "Install"}
         </button>
 
         {hasLocalOption &&
           <button onClick={this.togglePackageLocalInstallation}>
-            {status.installedLocal ? "Uninstall Offline" : "Install Offline"}
+            {localComponent ? "Uninstall Offline" : "Install Offline"}
           </button>
         }
 
         {showOpenOption &&
           <button onClick={this.openComponent}>
             Open
+          </button>
+        }
+
+        {updateAvailable &&
+          <button onClick={this.updateComponent}>
+            Update
           </button>
         }
 

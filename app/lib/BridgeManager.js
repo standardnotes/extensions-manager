@@ -122,13 +122,25 @@ export default class BridgeManager {
 
   installPackageOffline(aPackage) {
     console.log("Installing offline", aPackage);
-    let data = this.createComponentDataForPackage(aPackage);
-    let component = this.componentManager.createItem(data, (item) => {
-      console.log("installPackageOffline createItem response", item);
-      this.componentManager.sendCustomEvent("install-local-component", item, (installedComponent) => {
+
+    var run = (component) => {
+      this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {
         console.log("Prolink Installed Local component", installedComponent);
       });
-    });
+    }
+
+    var existingComponent = this.itemForPackage(aPackage, true);
+    if(existingComponent) {
+      existingComponent.content.package_info = aPackage;
+      run(existingComponent);
+    } else {
+      let data = this.createComponentDataForPackage(aPackage);
+      this.componentManager.createItem(data, (item) => {
+        console.log("installPackageOffline createItem response", item);
+        run(item);
+      });
+    }
+
   }
 
   uninstallPackageOffline(aPackage) {

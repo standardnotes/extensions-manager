@@ -11,7 +11,7 @@ export default class Home extends React.Component {
     BridgeManager.get().initiateBridge();
 
     this.repo = new Repo();
-    this.repo.url = "http://localhost:3004/users/repo";
+    this.repo.url = "http://localhost:3004/repos/";
   }
 
   render() {
