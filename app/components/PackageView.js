@@ -8,6 +8,7 @@ export default class PackageView extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {packageInfo: props.packageInfo};
   }
 
@@ -47,8 +48,9 @@ export default class PackageView extends React.Component {
     let hasLocalOption = p.download_url != null;
     let showOpenOption = installed && ["rooms", "modal"].includes((hostedComponent || localComponent).content.area);
     var updateAvailable = false, installedVersion;
+    var localInstallationAvailable = BridgeManager.get().localComponentInstallationAvailable();
 
-    if(localComponent) {
+    if(localInstallationAvailable && localComponent) {
       installedVersion = localComponent.content.package_info.version;
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
     }
@@ -56,17 +58,20 @@ export default class PackageView extends React.Component {
     return (
       <div>
         <p><strong>{p.name}</strong></p>
-        <p>Latest Version: {p.version}</p>
 
-        {localComponent &&
-          <p>Installed Version: {installedVersion}</p>
+        {localInstallationAvailable &&
+          <p>Latest Version: {p.version}</p>
+
+          [localComponent &&
+            <p>Installed Version: {installedVersion}</p>
+          ]
         }
 
         <button onClick={this.togglePackageInstallation}>
           {hostedComponent ? "Uninstall" : "Install"}
         </button>
 
-        {hasLocalOption &&
+        {localInstallationAvailable && hasLocalOption &&
           <button onClick={this.togglePackageLocalInstallation}>
             {localComponent ? "Uninstall Offline" : "Install Offline"}
           </button>
@@ -78,7 +83,7 @@ export default class PackageView extends React.Component {
           </button>
         }
 
-        {updateAvailable &&
+        {localInstallationAvailable && updateAvailable &&
           <button onClick={this.updateComponent}>
             Update
           </button>

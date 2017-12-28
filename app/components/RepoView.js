@@ -9,12 +9,14 @@ export default class RepoView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {packages: []};
+
     this.repoController = new RepoController({repo: props.repo});
     this.repoController.getPackages((packages) => {
       this.setState({packages: packages});
     })
 
     BridgeManager.get().addUpdateObserver(() => {
+      console.log("RepoView update observer");
       this.forceUpdate();
     })
   }

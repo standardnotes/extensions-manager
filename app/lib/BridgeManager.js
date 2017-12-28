@@ -23,7 +23,7 @@ export default class BridgeManager {
       }
     ]
 
-    this.componentManager = new ComponentManager(permissions, function(){
+    this.componentManager = new ComponentManager(permissions, () => {
       console.log("Prolink Ready");
       // on ready
     });
@@ -31,12 +31,12 @@ export default class BridgeManager {
     this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension"], (items) => {
       console.log("Prolink received items", items);
       for(var item of items) {
+        var index = this.items.indexOf(item);
         if(item.deleted) {
-          this.items.splice(this.items.indexOf(this.itemForId(item.uuid)), 1);
+          this.items.splice(index, 1);
           continue;
         }
         if(item.isMetadataUpdate) { continue; }
-        var index = this.items.indexOf(item);
         if(index >= 0) {
           this.items[index] = item;
         } else {
@@ -52,6 +52,10 @@ export default class BridgeManager {
 
     console.log("Setting size.");
     this.componentManager.setSize("container", 500, 300);
+  }
+
+  localComponentInstallationAvailable() {
+    return this.componentManager.isRunningInDesktopApplication();
   }
 
   itemForId(uuid) {
@@ -73,26 +77,19 @@ export default class BridgeManager {
   }
 
   isPackageInstalledHosted(aPackage) {
-    return this.items.filter((item) => {
-      return !item.deleted && !item.content.local && item.content.package_info
-    }).map((item) => {
-      return item.content.package_info.identifier
-    }).includes(aPackage.identifier);
+    return this.itemForPackage(aPackage);
   }
 
   isPackageInstalledLocal(aPackage) {
-    return this.items.filter((item) => {
-      return !item.deleted && item.content.local && item.content.package_info
-    }).map((item) => {
-      return item.content.package_info.identifier
-    }).includes(aPackage.identifier);
+    return this.itemForPackage(aPackage, true);
   }
 
   itemForPackage(aPackage, local) {
     return this.items.filter((item) => {
       return item.content.package_info
+      && !item.deleted
       && item.content.package_info.identifier == aPackage.identifier
-      && item.content.local == local
+      && (local ? item.content.local : !item.content.local)
     })[0];
   }
 
