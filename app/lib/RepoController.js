@@ -13,7 +13,7 @@ export default class RepoController {
       callback(response.packages);
     }, (error) => {
       console.log("Error loading repo", error);
-      callback(null, error);
+      callback(null, error || {});
     })
   }
 

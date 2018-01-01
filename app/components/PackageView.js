@@ -40,6 +40,11 @@ export default class PackageView extends React.Component {
     BridgeManager.get().installPackageOffline(this.packageInfo);
   }
 
+  openUrl = (url) => {
+    var win = window.open(url, '_blank');
+    win.focus();
+  }
+
   render() {
     let p = this.state.packageInfo;
     let hostedComponent = BridgeManager.get().itemForPackage(p, false);
@@ -58,6 +63,8 @@ export default class PackageView extends React.Component {
     return (
       <div>
         <p><strong>{p.name}</strong></p>
+        <img className="package-thumbnail" src={p.thumbnail_url} />
+        <p>{p.description}</p>
 
         {localInstallationAvailable &&
           <p>Latest Version: {p.version}</p>
@@ -67,27 +74,34 @@ export default class PackageView extends React.Component {
           ]
         }
 
-        <button onClick={this.togglePackageInstallation}>
+        <button className="button" onClick={this.togglePackageInstallation}>
           {hostedComponent ? "Uninstall" : "Install"}
         </button>
 
         {localInstallationAvailable && hasLocalOption &&
-          <button onClick={this.togglePackageLocalInstallation}>
+          <button className="button" onClick={this.togglePackageLocalInstallation}>
             {localComponent ? "Uninstall Offline" : "Install Offline"}
           </button>
         }
 
         {showOpenOption &&
-          <button onClick={this.openComponent}>
+          <button className="button" onClick={this.openComponent}>
             Open
           </button>
         }
 
         {localInstallationAvailable && updateAvailable &&
-          <button onClick={this.updateComponent}>
+          <button className="button" onClick={this.updateComponent}>
             Update
           </button>
         }
+
+        {p.marketing_url &&
+          <button onClick={() => {this.openUrl(p.marketing_url)}}>
+            Info
+          </button>
+        }
+
 
       </div>
     )

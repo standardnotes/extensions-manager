@@ -11,14 +11,21 @@ export default class RepoView extends React.Component {
     this.state = {packages: []};
 
     this.repoController = new RepoController({repo: props.repo});
-    this.repoController.getPackages((packages) => {
-      this.setState({packages: packages});
+    this.repoController.getPackages((packages, error) => {
+      if(!error) {
+        console.log("Setting packages", packages);
+        this.setState({packages: packages});
+      }
     })
 
     BridgeManager.get().addUpdateObserver(() => {
       console.log("RepoView update observer");
-      this.forceUpdate();
+      this.reload();
     })
+  }
+
+  reload() {
+    this.forceUpdate();
   }
 
   togglePackageInstallation(aPackage) {
@@ -38,12 +45,16 @@ export default class RepoView extends React.Component {
   }
 
   render() {
+    console.log("Rendering repo view for repo", this.props.repo);
     return (
-      <div>
-        <p>Packages:</p>
-        <div>
+      <div className="repo">
+        <h3 className="repo-name">ProLink Repository</h3>
+        <p className="repo-url">{this.props.repo.url}</p>
+        <div className="packages">
           {this.state.packages.map((p, index) =>
-            <PackageView key={index} packageInfo={p} />
+            <div className="package">
+              <PackageView key={index} packageInfo={p} />
+            </div>
           )}
         </div>
       </div>

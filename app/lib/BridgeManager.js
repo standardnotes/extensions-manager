@@ -1,4 +1,5 @@
 import ComponentManager from 'sn-components-api';
+import Repo from "../models/Repo.js";
 
 export default class BridgeManager {
 
@@ -14,7 +15,7 @@ export default class BridgeManager {
     this.items = [];
   }
 
-  initiateBridge() {
+  initiateBridge(onReady) {
     var permissions = [
       {
         // name: "stream-context-item"
@@ -25,6 +26,7 @@ export default class BridgeManager {
 
     this.componentManager = new ComponentManager(permissions, () => {
       console.log("Prolink Ready");
+      onReady && onReady();
       // on ready
     });
 
@@ -44,14 +46,30 @@ export default class BridgeManager {
         }
       }
 
-      for(var observer of this.updateObservers) {
-        observer.callback();
-      }
+      this.notifyObserversOfUpdate();
     });
 
 
     console.log("Setting size.");
-    this.componentManager.setSize("container", 500, 300);
+    this.componentManager.setSize("container", 800, 500);
+  }
+
+  notifyObserversOfUpdate() {
+    for(var observer of this.updateObservers) {
+      observer.callback();
+    }
+  }
+
+  get installedRepos() {
+    var urls = this.componentManager.componentDataValueForKey("repos") || [];
+    return urls.map((url) => {return new Repo(url)});
+  }
+
+  installRepoUrl(url) {
+    var urls = this.installedRepos.map((repo) => {return repo.url});
+    urls.push(url);
+    this.componentManager.setComponentDataValueForKey("repos", urls);
+    this.notifyObserversOfUpdate();
   }
 
   localComponentInstallationAvailable() {
