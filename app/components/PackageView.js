@@ -60,51 +60,58 @@ export default class PackageView extends React.Component {
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
     }
 
-    return (
-      <div>
-        <p><strong>{p.name}</strong></p>
-        <img className="package-thumbnail" src={p.thumbnail_url} />
-        <p>{p.description}</p>
+    return [
+        <div className="item-content">
+          <div className="item-column">
+            {p.thumbnail_url &&
+              <img src={p.thumbnail_url} />
+            }
 
-        {localInstallationAvailable &&
-          <p>Latest Version: {p.version}</p>
+            <h4><strong>{p.name}</strong></h4>
+            <p>{p.description}</p>
 
-          [localComponent &&
-            <p>Installed Version: {installedVersion}</p>
-          ]
-        }
+            {localInstallationAvailable &&
+              <p>Latest Version: {p.version}</p>
 
-        <button className="button" onClick={this.togglePackageInstallation}>
-          {hostedComponent ? "Uninstall" : "Install"}
-        </button>
+              [localComponent &&
+                <p>Installed Version: {installedVersion}</p>
+              ]
+            }
+          </div>
+        </div>,
 
-        {localInstallationAvailable && hasLocalOption &&
-          <button className="button" onClick={this.togglePackageLocalInstallation}>
-            {localComponent ? "Uninstall Offline" : "Install Offline"}
-          </button>
-        }
+        <div className="item-footer">
+          <div className="button-group">
+            <div className={"button " + (hostedComponent ? 'danger' : 'info')} onClick={this.togglePackageInstallation}>
+              {hostedComponent ? "Uninstall" : "Install"}
+            </div>
 
-        {showOpenOption &&
-          <button className="button" onClick={this.openComponent}>
-            Open
-          </button>
-        }
+            {localInstallationAvailable && hasLocalOption &&
+              <div className="button info" onClick={this.togglePackageLocalInstallation}>
+                {localComponent ? "Uninstall Offline" : "Install Offline"}
+              </div>
+            }
 
-        {localInstallationAvailable && updateAvailable &&
-          <button className="button" onClick={this.updateComponent}>
-            Update
-          </button>
-        }
+            {showOpenOption &&
+              <div className="button success" onClick={this.openComponent}>
+                Open
+              </div>
+            }
 
-        {p.marketing_url &&
-          <button onClick={() => {this.openUrl(p.marketing_url)}}>
-            Info
-          </button>
-        }
+            {localInstallationAvailable && updateAvailable &&
+              <div className="button info" onClick={this.updateComponent}>
+                Update
+              </div>
+            }
 
-
-      </div>
-    )
+            {p.marketing_url &&
+              <div className="button default" onClick={() => {this.openUrl(p.marketing_url)}}>
+                Info
+              </div>
+            }
+          </div>
+        </div>
+    ]
   }
 
 }

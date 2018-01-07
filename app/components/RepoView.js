@@ -47,15 +47,16 @@ export default class RepoView extends React.Component {
   render() {
     console.log("Rendering repo view for repo", this.props.repo);
     return (
-      <div className="repo">
-        <h3 className="repo-name">ProLink Repository</h3>
-        <p className="repo-url">{this.props.repo.url}</p>
-        <div className="packages">
-          {this.state.packages.map((p, index) =>
-            <div className="package">
-              <PackageView key={index} packageInfo={p} />
-            </div>
-          )}
+      <div className="panel-section">
+        <h3 className="title panel-row">ProLink Repository</h3>
+        <div className="panel-row">
+          <div className="packages panel-table">
+            {this.state.packages.map((p, index) =>
+              <div className="table-item">
+                <PackageView key={index} packageInfo={p} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     )

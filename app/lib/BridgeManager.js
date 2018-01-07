@@ -51,7 +51,7 @@ export default class BridgeManager {
 
 
     console.log("Setting size.");
-    this.componentManager.setSize("container", 800, 500);
+    this.componentManager.setSize("container", 800, 700);
   }
 
   notifyObserversOfUpdate() {

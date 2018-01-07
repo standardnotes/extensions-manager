@@ -26,16 +26,31 @@ export default class InstallRepo extends React.Component {
   }
 
   render() {
+    /*
+
+    .panel-section
+                    %h3.title Update Account
+                    %p Fill out the form below to update your email address and password.
+                    .panel-row.panel-form.half
+                      .column
+                        %input{"placeholder" => "Email"}
+                        %input{"placeholder" => "Password", "type" => "password"}
+
+    */
     return (
-      <div id="install-repo">
-        <h3>Install ProLink</h3>
-        <input
-          placeholder="Enter ProLink URL"
-          type="url"
-          value={this.state.url}
-          onKeyPress={this.handleKeyPress}
-          onChange={this.handleChange}
-        />
+      <div id="install-repo" className="panel-section">
+        <h3 className="title panel-row">Install ProLink</h3>
+        <div className="panel-row panel-form ">
+          <div className="panel-column">
+            <input
+              placeholder="Enter ProLink URL"
+              type="url"
+              value={this.state.url}
+              onKeyPress={this.handleKeyPress}
+              onChange={this.handleChange}
+            />
+          </div>
+        </div>
       </div>
     )
   }

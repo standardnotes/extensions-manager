@@ -27,11 +27,13 @@ export default class Home extends React.Component {
 
   render() {
     return (
-      <div id="home" className="repos">
-        {this.state.repos.map((repo, index) =>
-          <RepoView key={index} repo={repo} />
-        )}
-        <InstallRepo />
+      <div id="home" className="repos panel static">
+        <div className="content">
+          {this.state.repos.map((repo, index) =>
+            <RepoView key={index} repo={repo} />
+          )}
+          <InstallRepo />
+        </div>
       </div>
     )
   }
