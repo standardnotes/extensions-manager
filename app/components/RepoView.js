@@ -44,11 +44,30 @@ export default class RepoView extends React.Component {
     }
   }
 
+  toggleOptions = () => {
+    this.setState({showOptions: !this.state.showOptions});
+  }
+
+  deleteRepo = () => {
+    if(confirm("Are you sure you want to delete this ProLink repository?")) {
+      BridgeManager.get().uninstallRepo(this.props.repo);
+    }
+  }
+
   render() {
-    console.log("Rendering repo view for repo", this.props.repo);
     return (
       <div className="panel-section">
-        <h3 className="title panel-row">ProLink Repository</h3>
+        <div className="panel-row">
+          <h3 className="title">ProLink Repository</h3>
+          <a onClick={this.toggleOptions} className="info">Options</a>
+        </div>
+
+        {this.state.showOptions &&
+            <div className="panel-row">
+              <a onClick={this.deleteRepo} className="danger">Delete</a>
+            </div>
+        }
+
         <div className="panel-row">
           <div className="packages panel-table">
             {this.state.packages.map((p, index) =>

@@ -17,18 +17,10 @@ export default class PackageView extends React.Component {
   }
 
   togglePackageInstallation = () => {
-    if(BridgeManager.get().isPackageInstalledHosted(this.packageInfo)) {
-      BridgeManager.get().uninstallPackageHosted(this.packageInfo);
+    if(BridgeManager.get().isPackageInstalled(this.packageInfo)) {
+      BridgeManager.get().uninstallPackage(this.packageInfo);
     } else {
-      BridgeManager.get().installPackageHosted(this.packageInfo);
-    }
-  }
-
-  togglePackageLocalInstallation = () => {
-    if(BridgeManager.get().isPackageInstalledLocal(this.packageInfo)) {
-      BridgeManager.get().uninstallPackageOffline(this.packageInfo);
-    } else {
-      BridgeManager.get().installPackageOffline(this.packageInfo);
+      BridgeManager.get().installPackage(this.packageInfo);
     }
   }
 
@@ -47,16 +39,13 @@ export default class PackageView extends React.Component {
 
   render() {
     let p = this.state.packageInfo;
-    let hostedComponent = BridgeManager.get().itemForPackage(p, false);
-    let localComponent = BridgeManager.get().itemForPackage(p, true);
-    let installed = hostedComponent || localComponent;
-    let hasLocalOption = p.download_url != null;
-    let showOpenOption = installed && ["rooms", "modal"].includes((hostedComponent || localComponent).content.area);
+    let component = BridgeManager.get().itemForPackage(p, false);
+    let showOpenOption = installed && ["rooms", "modal"].includes(component.content.area);
     var updateAvailable = false, installedVersion;
     var localInstallationAvailable = BridgeManager.get().localComponentInstallationAvailable();
 
-    if(localInstallationAvailable && localComponent) {
-      installedVersion = localComponent.content.package_info.version;
+    if(localInstallationAvailable && component) {
+      installedVersion = component.content.package_info.version;
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
     }
 
@@ -85,12 +74,6 @@ export default class PackageView extends React.Component {
             <div className={"button " + (hostedComponent ? 'danger' : 'info')} onClick={this.togglePackageInstallation}>
               {hostedComponent ? "Uninstall" : "Install"}
             </div>
-
-            {localInstallationAvailable && hasLocalOption &&
-              <div className="button info" onClick={this.togglePackageLocalInstallation}>
-                {localComponent ? "Uninstall Offline" : "Install Offline"}
-              </div>
-            }
 
             {showOpenOption &&
               <div className="button success" onClick={this.openComponent}>

@@ -26,30 +26,33 @@ export default class InstallRepo extends React.Component {
   }
 
   render() {
-    /*
-
-    .panel-section
-                    %h3.title Update Account
-                    %p Fill out the form below to update your email address and password.
-                    .panel-row.panel-form.half
-                      .column
-                        %input{"placeholder" => "Email"}
-                        %input{"placeholder" => "Password", "type" => "password"}
-
-    */
     return (
       <div id="install-repo" className="panel-section">
-        <h3 className="title panel-row">Install ProLink</h3>
-        <div className="panel-row panel-form ">
-          <div className="panel-column">
-            <input
-              placeholder="Enter ProLink URL"
-              type="url"
-              value={this.state.url}
-              onKeyPress={this.handleKeyPress}
-              onChange={this.handleChange}
-            />
-          </div>
+        <div className="panel-row centered">
+          <h1 className="title"><strong>Enter Your ProLink Activation Code</strong></h1>
+        </div>
+        <div className="notification info dashed one-line">
+          <input
+            className="info clear center-text"
+            placeholder="Enter ProLink Code"
+            type="url"
+            value={this.state.url}
+            onKeyPress={this.handleKeyPress}
+            onChange={this.handleChange}
+          />
+        </div>
+        <div className="panel-row centered">
+          <h1 className="title center-text">
+            <strong>Standard Notes Pro</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.
+          </h1>
+        </div>
+        <div className="panel-row" />
+        <div className="panel-row centered">
+          <a href="https://standardnotes.org/extensions" target="_blank" className="button info big">
+            <div className="label">
+              Learn More
+            </div>
+          </a>
         </div>
       </div>
     )

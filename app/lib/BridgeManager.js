@@ -18,14 +18,12 @@ export default class BridgeManager {
   initiateBridge(onReady) {
     var permissions = [
       {
-        // name: "stream-context-item"
         name: "stream-items",
         content_types: ["SN|Component", "SN|Theme", "SF|Extension"]
       }
     ]
 
     this.componentManager = new ComponentManager(permissions, () => {
-      console.log("Prolink Ready");
       onReady && onReady();
       // on ready
     });
@@ -50,7 +48,6 @@ export default class BridgeManager {
     });
 
 
-    console.log("Setting size.");
     this.componentManager.setSize("container", 800, 700);
   }
 
@@ -69,6 +66,15 @@ export default class BridgeManager {
     var urls = this.installedRepos.map((repo) => {return repo.url});
     urls.push(url);
     this.componentManager.setComponentDataValueForKey("repos", urls);
+    this.notifyObserversOfUpdate();
+  }
+
+  uninstallRepo(repo) {
+    var urls = this.componentManager.componentDataValueForKey("repos") || [];
+    console.log("Removing", repo.url, "from", urls);
+    urls.splice(urls.indexOf(repo.url), 1);
+    this.componentManager.setComponentDataValueForKey("repos", urls);
+    console.log("Setting urls", urls);
     this.notifyObserversOfUpdate();
   }
 

@@ -1,22 +1,5 @@
-$default-font-size: 16px;
-$default-border-radius: 4px;
-$default-border-color: rgba(black, 0.08);
-$small-font-size: 13px;
-
-html {
-  padding: 15px;
-}
-
-body {
-  font-size: $default-font-size;
-  font-family: sans-serif;
-  margin: 0;
-  width: 100%;
-  height: 100%;
-}
-
-#home {
-  padding-bottom: 20px;
+html, body {
+  font-size: 17px;
 }
 
 .sn-component {
@@ -35,9 +18,6 @@ body {
   box-shadow: none;
   border: none;
   border-radius: 0;
-}
-.sn-component .panel.static .content {
-  padding: 0;
 }
 .sn-component .panel .header {
   flex-shrink: 0;
@@ -84,6 +64,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding-top: 0.4rem;
+}
+.sn-component .panel .content .panel-section .panel-row.centered {
+  justify-content: center;
 }
 .sn-component .panel .content .panel-section .panel-row .panel-column {
   width: 100%;
@@ -206,17 +189,21 @@ body {
 .sn-component h1 {
   font-weight: 500;
   font-size: 1.3rem;
+  line-height: 1.9rem;
 }
 .sn-component h2 {
   font-size: 1.2rem;
+  line-height: 1.8rem;
 }
 .sn-component h3 {
   font-weight: normal;
   font-size: 1.2rem;
+  line-height: 1.7rem;
 }
 .sn-component h4 {
   font-weight: bold;
   font-size: 0.95rem;
+  line-height: 1.4rem;
 }
 .sn-component h5 {
   font-weight: bold;
@@ -240,6 +227,14 @@ body {
 .sn-component *.success {
   color: #2B9612;
 }
+.sn-component *.clear {
+  background-color: transparent;
+  border: none;
+}
+.sn-component .center-text {
+  text-align: center;
+  justify-content: center;
+}
 .sn-component p {
   margin: 0.5rem 0;
 }
@@ -252,10 +247,15 @@ body {
   font-size: 1.1rem;
   width: 100%;
   outline: 0;
+  resize: none;
 }
 .sn-component input.info {
   border-color: #086DD6;
   background-color: transparent;
+  color: #086DD6;
+}
+.sn-component input.info::-webkit-input-placeholder {
+  color: rgba(8, 109, 214, 0.5);
 }
 .sn-component label {
   margin: 0.7rem 0;
@@ -314,6 +314,9 @@ body {
 .sn-component .box-group .box:not(:last-child) {
   margin-right: 5px;
 }
+.sn-component a.button, .sn-component a.box, .sn-component a.circle {
+  text-decoration: none;
+}
 .sn-component .button, .sn-component .box, .sn-component .circle {
   display: table;
   border-radius: 3px;
@@ -327,6 +330,10 @@ body {
   font-weight: bold;
   display: block;
   text-align: center;
+}
+.sn-component .button.big, .sn-component .big.box, .sn-component .big.circle {
+  font-size: 1.1rem;
+  padding: 0.7rem 2.5rem;
 }
 .sn-component .box {
   padding: 2.5rem 1.5rem;
@@ -498,8 +505,14 @@ body {
   border-radius: 0.2rem;
   cursor: default;
 }
+.sn-component .notification.one-line {
+  padding: 0rem 0.4rem;
+}
 .sn-component .notification.stretch {
   width: 100%;
+}
+.sn-component .notification.dashed {
+  border-style: dashed;
 }
 .sn-component .notification .text {
   line-height: 1.5rem;
@@ -617,7 +630,8 @@ body {
   padding-top: 1px;
 }
 .sn-component .panel-table .table-item {
-  flex-basis: 45%;
+  flex: 45%;
+  flex-flow: wrap;
   border: 1px solid #DDDDDD;
   padding: 1rem;
   margin-left: -1px;
