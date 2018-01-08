@@ -19,7 +19,7 @@ export default class BridgeManager {
     var permissions = [
       {
         name: "stream-items",
-        content_types: ["SN|Component", "SN|Theme", "SF|Extension"]
+        content_types: ["SN|Component", "SN|Theme", "SF|Extension", "Extension"]
       }
     ]
 
@@ -28,18 +28,25 @@ export default class BridgeManager {
       // on ready
     });
 
-    this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension"], (items) => {
+    this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], (items) => {
       console.log("Prolink received items", items);
       for(var item of items) {
-        var index = this.items.indexOf(item);
+        console.log("Checking item", item);
         if(item.deleted) {
-          this.items.splice(index, 1);
+          this.removeItemFromItems(item);
           continue;
         }
-        if(item.isMetadataUpdate) { continue; }
+        if(item.isMetadataUpdate) {
+          continue;
+        }
+
+        // Do not load index before this, as splicing will affect it
+        var index = this.indexOfItem(item);
         if(index >= 0) {
+          console.log("Replacing at index", index);
           this.items[index] = item;
         } else {
+          console.log("Pushing to end");
           this.items.push(item);
         }
       }
@@ -48,12 +55,33 @@ export default class BridgeManager {
     });
 
 
-    this.componentManager.setSize("container", 800, 700);
+    this.componentManager.setSize("container", 800, 500);
+  }
+
+  indexOfItem(item) {
+    for(var index in this.items) {
+      if(this.items[index].uuid == item.uuid) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  removeItemFromItems(item) {
+    this.items = this.items.filter((candidate) => {return candidate.uuid !== item.uuid});
+  }
+
+  allInstalled() {
+    return this.items;
   }
 
   notifyObserversOfUpdate() {
     for(var observer of this.updateObservers) {
       observer.callback();
+    }
+
+    if(this.installedRepos.length > 0) {
+      this.componentManager.setSize("container", 800, 700);
     }
   }
 
@@ -97,29 +125,26 @@ export default class BridgeManager {
   }
 
   isPackageInstalled(aPackage) {
-    return this.isPackageInstalledHosted(aPackage) || this.isPackageInstalledLocal(aPackage);
-  }
-
-  isPackageInstalledHosted(aPackage) {
     return this.itemForPackage(aPackage);
   }
 
-  isPackageInstalledLocal(aPackage) {
-    return this.itemForPackage(aPackage, true);
-  }
-
-  itemForPackage(aPackage, local) {
+  itemForPackage(aPackage) {
     return this.items.filter((item) => {
       return item.content.package_info
       && !item.deleted
       && item.content.package_info.identifier == aPackage.identifier
-      && (local ? item.content.local : !item.content.local)
     })[0];
   }
 
-  installPackageHosted(aPackage) {
+  installPackage(aPackage) {
     console.log("Installing", aPackage);
-    let component = this.componentManager.createItem(this.createComponentDataForPackage(aPackage));
+    this.componentManager.createItem(this.createComponentDataForPackage(aPackage), (component) => {
+      if(this.localComponentInstallationAvailable()) {
+        this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {
+          console.log("Prolink Installed Local component", installedComponent);
+        });
+      }
+    });
   }
 
   createComponentDataForPackage(aPackage) {
@@ -128,17 +153,22 @@ export default class BridgeManager {
       content: {
         identifier: aPackage.identifier,
         name: aPackage.name,
-        url: aPackage.url,
+        hosted_url: aPackage.url,
+        local_url: null,
         area: aPackage.area,
         package_info: aPackage
       }
     };
   }
 
-  uninstallPackageHosted(aPackage) {
+  uninstallPackage(aPackage) {
     let item = this.itemForPackage(aPackage);
     console.log("Uninstalling", item);
-    this.componentManager.deleteItem(item);
+    this.uninstallComponent(item);
+  }
+
+  uninstallComponent(component) {
+    this.componentManager.deleteItem(component);
   }
 
   installPackageOffline(aPackage) {

@@ -39,8 +39,8 @@ export default class PackageView extends React.Component {
 
   render() {
     let p = this.state.packageInfo;
-    let component = BridgeManager.get().itemForPackage(p, false);
-    let showOpenOption = installed && ["rooms", "modal"].includes(component.content.area);
+    let component = BridgeManager.get().itemForPackage(p);
+    let showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
     var updateAvailable = false, installedVersion;
     var localInstallationAvailable = BridgeManager.get().localComponentInstallationAvailable();
 
@@ -71,8 +71,8 @@ export default class PackageView extends React.Component {
 
         <div className="item-footer">
           <div className="button-group">
-            <div className={"button " + (hostedComponent ? 'danger' : 'info')} onClick={this.togglePackageInstallation}>
-              {hostedComponent ? "Uninstall" : "Install"}
+            <div className={"button " + (component ? 'danger' : 'info')} onClick={this.togglePackageInstallation}>
+              {component ? "Uninstall" : "Install"}
             </div>
 
             {showOpenOption &&

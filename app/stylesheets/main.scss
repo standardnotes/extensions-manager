@@ -1,5 +1,14 @@
 html, body {
   font-size: 17px;
+  margin: 0;
+}
+
+.panel {
+  height: 100%;
+
+  .footer {
+    font-size: 15px;
+  }
 }
 
 .sn-component {
@@ -45,7 +54,7 @@ html, body {
   display: block;
 }
 .sn-component .panel .content {
-  padding: 1.9rem 2rem;
+  padding: 1.6rem 2rem;
   padding-bottom: 0;
   flex-grow: 1;
 }
@@ -71,10 +80,10 @@ html, body {
 .sn-component .panel .content .panel-section .panel-row .panel-column {
   width: 100%;
 }
-.sn-component .panel .content .panel-section .panel-row:not(:last-child) {
+.sn-component .panel .content .panel-section .panel-row.default-padding, .sn-component .panel .content .panel-section .panel-row:not(:last-child) {
   padding-bottom: 0.4rem;
 }
-.sn-component .panel .content .panel-section .panel-row:not(:last-child).condensed {
+.sn-component .panel .content .panel-section .panel-row.default-padding.condensed, .sn-component .panel .content .panel-section .panel-row:not(:last-child).condensed {
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
 }
@@ -92,6 +101,9 @@ html, body {
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #DDDDDD;
 }
+.sn-component .panel .content .panel-section:not(:last-child).no-border {
+  border-bottom: none;
+}
 .sn-component .panel .content .panel-section:last-child {
   margin-bottom: 0.5rem;
 }
@@ -102,7 +114,7 @@ html, body {
   margin-bottom: 15px;
 }
 .sn-component .panel .content .panel-section .subtitle {
-  margin-top: -4px;
+  margin-top: -0.5rem;
 }
 .sn-component .panel .content .panel-section .subtitle.subtle {
   font-weight: normal;
@@ -116,6 +128,10 @@ html, body {
 }
 .sn-component .panel .content .panel-form .form-submit {
   margin-top: 0.15rem;
+}
+.sn-component .right-aligned {
+  justify-content: flex-end;
+  text-align: right;
 }
 .sn-component .menu-panel {
   box-shadow: 0px 4px 4px #C8C8C8;
@@ -273,6 +289,9 @@ html, body {
 }
 .sn-component .horizontal-group > *:not(:first-child), .sn-component .input-group > *:not(:first-child) {
   margin-left: 0.9rem;
+}
+.sn-component .border-bottom {
+  border-bottom: 1px solid #DDDDDD;
 }
 .sn-component .checkbox-group {
   padding-top: 0.5rem;
