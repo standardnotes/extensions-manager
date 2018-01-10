@@ -16,22 +16,32 @@ export default class BridgeManager {
   }
 
   initiateBridge(onReady) {
-    var permissions = [
-      {
-        name: "stream-items",
-        content_types: ["SN|Component", "SN|Theme", "SF|Extension", "Extension"]
-      }
-    ]
+    // var permissions = [
+    //   {
+    //     name: "stream-items",
+    //     content_types: ["SN|Component", "SN|Theme", "SF|Extension", "Extension"]
+    //   }
+    // ]
 
-    this.componentManager = new ComponentManager(permissions, () => {
+    this.componentManager = new ComponentManager([], () => {
       onReady && onReady();
       // on ready
     });
 
+    this.componentManager.acceptsThemes = false;
+
+    this.componentManager.setSize("container", 800, 500);
+  }
+
+  didBeginStreaming() {
+    return this._didBeginStreaming;
+  }
+
+  beginStreamingItems() {
+    this._didBeginStreaming = true;
     this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], (items) => {
       console.log("Prolink received items", items);
       for(var item of items) {
-        console.log("Checking item", item);
         if(item.deleted) {
           this.removeItemFromItems(item);
           continue;
@@ -40,13 +50,10 @@ export default class BridgeManager {
           continue;
         }
 
-        // Do not load index before this, as splicing will affect it
         var index = this.indexOfItem(item);
         if(index >= 0) {
-          console.log("Replacing at index", index);
           this.items[index] = item;
         } else {
-          console.log("Pushing to end");
           this.items.push(item);
         }
       }
@@ -54,8 +61,6 @@ export default class BridgeManager {
       this.notifyObserversOfUpdate();
     });
 
-
-    this.componentManager.setSize("container", 800, 500);
   }
 
   indexOfItem(item) {
@@ -99,10 +104,8 @@ export default class BridgeManager {
 
   uninstallRepo(repo) {
     var urls = this.componentManager.componentDataValueForKey("repos") || [];
-    console.log("Removing", repo.url, "from", urls);
     urls.splice(urls.indexOf(repo.url), 1);
     this.componentManager.setComponentDataValueForKey("repos", urls);
-    console.log("Setting urls", urls);
     this.notifyObserversOfUpdate();
   }
 
@@ -129,20 +132,37 @@ export default class BridgeManager {
   }
 
   itemForPackage(aPackage) {
-    return this.items.filter((item) => {
+    var result = this.items.filter((item) => {
       return item.content.package_info
       && !item.deleted
       && item.content.package_info.identifier == aPackage.identifier
     })[0];
+    return result;
   }
 
-  installPackage(aPackage) {
+  installPackageFromUrl(url, callback) {
+    HttpManager.get().getAbsolute(url, {}, (response) => {
+      console.log("Install from url response:", response);
+      this.installPackage(response, (component) => {
+        callback(component);
+      })
+      callback(response);
+    }, (error) => {
+      console.log("Error installing from url", error);
+      callback(null, error || {});
+    })
+  }
+
+  installPackage(aPackage, callback) {
     console.log("Installing", aPackage);
     this.componentManager.createItem(this.createComponentDataForPackage(aPackage), (component) => {
       if(this.localComponentInstallationAvailable()) {
         this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {
           console.log("Prolink Installed Local component", installedComponent);
+          callback && callback(component);
         });
+      } else {
+        callback && callback(component);
       }
     });
   }
@@ -200,9 +220,8 @@ export default class BridgeManager {
     this.componentManager.deleteItem(item);
   }
 
-  sendOpenEvent(aPackage) {
-    let component = this.itemForPackage(aPackage);
-    this.componentManager.sendCustomEvent("open-component", component);
+  toggleOpenEvent(component) {
+    this.componentManager.sendCustomEvent("toggle-activate-component", component);
   }
 
 }

@@ -9,7 +9,7 @@ export default class PackageView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {packageInfo: props.packageInfo};
+    this.state = {packageInfo: props.packageInfo, component: props.component};
   }
 
   get packageInfo() {
@@ -17,15 +17,19 @@ export default class PackageView extends React.Component {
   }
 
   togglePackageInstallation = () => {
-    if(BridgeManager.get().isPackageInstalled(this.packageInfo)) {
-      BridgeManager.get().uninstallPackage(this.packageInfo);
+    if(this.props.component) {
+      BridgeManager.get().uninstallComponent(this.props.component);
     } else {
-      BridgeManager.get().installPackage(this.packageInfo);
+      if(BridgeManager.get().isPackageInstalled(this.packageInfo)) {
+        BridgeManager.get().uninstallPackage(this.packageInfo);
+      } else {
+        BridgeManager.get().installPackage(this.packageInfo);
+      }
     }
   }
 
   openComponent = () => {
-    BridgeManager.get().sendOpenEvent(this.packageInfo);
+    BridgeManager.get().toggleOpenEvent(this.component);
   }
 
   updateComponent = () => {
@@ -37,14 +41,19 @@ export default class PackageView extends React.Component {
     win.focus();
   }
 
-  render() {
-    let p = this.state.packageInfo;
-    let component = BridgeManager.get().itemForPackage(p);
-    let showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
-    var updateAvailable = false, installedVersion;
-    var localInstallationAvailable = BridgeManager.get().localComponentInstallationAvailable();
+  get component() {
+    return this.props.component || BridgeManager.get().itemForPackage(this.props.packageInfo)
+  }
 
-    if(localInstallationAvailable && component) {
+  render() {
+    let p = this.state.packageInfo || (this.component.content.package_info || this.component.content);
+    let component = this.component;
+    let showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
+    let showActivateOption = component && !showOpenOption && !["editor-editor"].includes(component.content.area);
+    var updateAvailable = false, installedVersion;
+    var localInstallPossible = BridgeManager.get().localComponentInstallationAvailable();
+
+    if(localInstallPossible && component) {
       installedVersion = component.content.package_info.version;
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
     }
@@ -52,17 +61,20 @@ export default class PackageView extends React.Component {
     return [
         <div className="item-content">
           <div className="item-column">
-            {p.thumbnail_url &&
+            {p.thumbnail_url && !this.props.hideMeta &&
               <img src={p.thumbnail_url} />
             }
 
             <h4><strong>{p.name}</strong></h4>
-            <p>{p.description}</p>
 
-            {localInstallationAvailable &&
+            {!this.props.hideMeta &&
+              <p>{p.description}</p>
+            }
+
+            {localInstallPossible &&
               <p>Latest Version: {p.version}</p>
 
-              [localComponent &&
+              [component &&
                 <p>Installed Version: {installedVersion}</p>
               ]
             }
@@ -71,9 +83,11 @@ export default class PackageView extends React.Component {
 
         <div className="item-footer">
           <div className="button-group">
-            <div className={"button " + (component ? 'danger' : 'info')} onClick={this.togglePackageInstallation}>
-              {component ? "Uninstall" : "Install"}
-            </div>
+            {!component &&
+              <div className="button info" onClick={this.togglePackageInstallation}>
+                Install
+              </div>
+            }
 
             {showOpenOption &&
               <div className="button success" onClick={this.openComponent}>
@@ -81,9 +95,22 @@ export default class PackageView extends React.Component {
               </div>
             }
 
-            {localInstallationAvailable && updateAvailable &&
+            {showActivateOption &&
+
+              <div className={"button " + (component.content.active ? "warning" : "success")} onClick={this.openComponent}>
+                {component.content.active ? "Deactivate" : "Activate"}
+              </div>
+            }
+
+            {localInstallPossible && updateAvailable &&
               <div className="button info" onClick={this.updateComponent}>
                 Update
+              </div>
+            }
+
+            {component &&
+              <div className="button danger" onClick={this.togglePackageInstallation}>
+                Uninstall
               </div>
             }
 

@@ -1,15 +1,21 @@
 import React from 'react';
 import BridgeManager from "../lib/BridgeManager.js";
+import PackageView from "./PackageView";
 
 export default class ManageInstalled extends React.Component {
 
   constructor(props) {
     super(props);
 
-    BridgeManager.get().addUpdateObserver(() => {
-      console.log("ManageInstalled update observer");
+    BridgeManager.get().beginStreamingItems();
+
+    this.updateObserver = BridgeManager.get().addUpdateObserver(() => {
       this.reload();
     })
+  }
+
+  componentWillUnmount() {
+    BridgeManager.get().removeUpdateObserver(this.updateObserver);
   }
 
   reload() {
@@ -24,8 +30,29 @@ export default class ManageInstalled extends React.Component {
 
   }
 
+  category = (title, extensions) => {
+    return (
+      <div className="panel-section">
+        <h4 className="title panel-row">{title} ({extensions.length})</h4>
+        <div className="packages panel-table panel-row">
+          {extensions.map((ext, index) =>
+            <div className="table-item">
+              <PackageView key={ext.uuid} component={ext} hideMeta={true} />
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   render() {
     var extensions = BridgeManager.get().allInstalled();
+    var themes = extensions.filter((candidate) => {return candidate.content_type == "SN|Theme" || candidate.content.area == "themes"});
+    var editors = extensions.filter((candidate) => {return candidate.content.area == "editor-editor"});
+    var components = extensions.filter((candidate) => {return candidate.content_type == "SN|Component" && candidate.content.area != "editor-editor"});
+    var serverExtensions = extensions.filter((candidate) => {return candidate.content_type == "SF|Extension"});
+    var other = extensions.subtract(themes).subtract(editors).subtract(components).subtract(serverExtensions);
+
     return (
       <div className="panel-section no-border">
 
@@ -33,23 +60,32 @@ export default class ManageInstalled extends React.Component {
           <h3 className="title">Installed Extensions ({extensions.length})</h3>
         </div>
 
-        {extensions.map((ext, index) =>
-          <div key={ext.uuid} className="panel-row border-bottom default-padding">
-            <div className="panel-column">
-                <h4 className="title">{ext.content.name}</h4>
-            </div>
+        {themes.length > 0 &&
+          this.category("Themes", themes)
+        }
 
-            <div className="panel-column">
-              <div className="horizontal-group right-aligned">
-                <a onClick={() => {this.renameExt(ext)}} className="info">Rename</a>
-                <a onClick={() => {this.uninstallExt(ext)}} className="danger">Uninstall</a>
-              </div>
-            </div>
-          </div>
-        )}
+        {components.length > 0 &&
+          this.category("Components", components)
+        }
+
+        {editors.length > 0 &&
+          this.category("Editors", editors)
+        }
+
+        {serverExtensions.length > 0 &&
+          this.category("Server Extensions", serverExtensions)
+        }
+
+        {other.length > 0 &&
+          this.category("Other", other)
+        }
+
 
       </div>
     )
   }
-
 }
+
+Array.prototype.subtract = function(a) {
+  return this.filter(function(i) {return a.indexOf(i) < 0;});
+};

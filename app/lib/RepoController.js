@@ -8,7 +8,6 @@ export default class RepoController {
 
   getPackages(callback) {
     HttpManager.get().getAbsolute(this.repo.url, {}, (response) => {
-      console.log("Loaded repo:", response);
       this.response = response;
       callback(response.packages);
     }, (error) => {

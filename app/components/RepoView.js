@@ -13,35 +13,21 @@ export default class RepoView extends React.Component {
     this.repoController = new RepoController({repo: props.repo});
     this.repoController.getPackages((packages, error) => {
       if(!error) {
-        console.log("Setting packages", packages);
         this.setState({packages: packages});
       }
     })
 
-    BridgeManager.get().addUpdateObserver(() => {
-      console.log("RepoView update observer");
+    this.updateObserver = BridgeManager.get().addUpdateObserver(() => {
       this.reload();
     })
   }
 
+  componentWillUnmount() {
+    BridgeManager.get().removeUpdateObserver(this.updateObserver);
+  }
+
   reload() {
     this.forceUpdate();
-  }
-
-  togglePackageInstallation(aPackage) {
-    if(BridgeManager.get().isPackageInstalledHosted(aPackage)) {
-      BridgeManager.get().uninstallPackageHosted(aPackage);
-    } else {
-      BridgeManager.get().installPackageHosted(aPackage);
-    }
-  }
-
-  togglePackageLocalInstallation(aPackage) {
-    if(BridgeManager.get().isPackageInstalledLocal(aPackage)) {
-      BridgeManager.get().uninstallPackageOffline(aPackage);
-    } else {
-      BridgeManager.get().installPackageOffline(aPackage);
-    }
   }
 
   toggleOptions = () => {
@@ -72,7 +58,7 @@ export default class RepoView extends React.Component {
           <div className="packages panel-table">
             {this.state.packages.map((p, index) =>
               <div className="table-item">
-                <PackageView key={index} packageInfo={p} />
+                <PackageView key={p.identifier} packageInfo={p} />
               </div>
             )}
           </div>
