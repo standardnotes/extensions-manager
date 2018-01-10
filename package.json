@@ -9,6 +9,9 @@
     "start": "webpack-dev-server --devtool eval --progress --hot --content-base app",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 1"
   },
+  "sn": {
+    "main": "dist/index.html"
+  },
   "devDependencies": {
     "compare-versions": "^3.1.0",
     "babel-core": "6.x",
