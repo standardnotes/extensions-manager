@@ -6,14 +6,15 @@ const uglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 
 module.exports = {
   devtool: 'cheap-source-map',
-  entry: [
-    path.resolve(__dirname, 'app/main.js'),
-    path.resolve(__dirname, 'app/stylesheets/main.scss'),
-  ],
+  entry: {
+    "dist" : path.resolve(__dirname, 'app/main.js'),
+    "dist.min" : path.resolve(__dirname, 'app/main.js'),
+    "dist" : path.resolve(__dirname, 'app/stylesheets/main.scss'),
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
-    filename: './dist.js'
+    filename: './[name].js'
   },
   devServer: {
     historyApiFallback: true,
@@ -51,9 +52,8 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin({ filename: './dist.css', disable: false, allChunks: true}),
     new uglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
+      include: /\.min\.js$/,
+      minimize: true
     }),
     new webpack.DefinePlugin({
       'process.env': {
