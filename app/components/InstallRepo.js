@@ -29,12 +29,12 @@ export default class InstallRepo extends React.Component {
     return (
       <div id="install-repo" className="panel-section">
         <div className="panel-row centered">
-          <h1 className="title"><strong>Enter Your ProLink Activation Code</strong></h1>
+          <h1 className="title"><strong>Enter Your Extended Activation Code</strong></h1>
         </div>
         <div className="notification info dashed one-line">
           <input
             className="info clear center-text"
-            placeholder="Enter ProLink Code"
+            placeholder="Enter Extended Code"
             type="url"
             value={this.state.url}
             onKeyPress={this.handleKeyPress}

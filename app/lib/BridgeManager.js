@@ -40,7 +40,7 @@ export default class BridgeManager {
   beginStreamingItems() {
     this._didBeginStreaming = true;
     this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], (items) => {
-      console.log("Prolink received items", items);
+      // console.log("Prolink received items", items);
       for(var item of items) {
         if(item.deleted) {
           this.removeItemFromItems(item);

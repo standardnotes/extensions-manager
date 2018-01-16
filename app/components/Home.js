@@ -35,13 +35,13 @@ export default class Home extends React.Component {
     return (
       <div id="home" className="panel static">
         <div className="content">
+          {this.state.ready && this.state.repos.length == 0 &&
+            <InstallRepo />
+          }
           <ManageInstalled />
           {this.state.repos.map((repo, index) =>
             <RepoView key={index} repo={repo} />
           )}
-          {this.state.ready && this.state.repos.length == 0 &&
-            <InstallRepo />
-          }
         </div>
 
         <div className="footer">

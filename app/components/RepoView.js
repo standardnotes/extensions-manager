@@ -44,7 +44,7 @@ export default class RepoView extends React.Component {
     return (
       <div className="panel-section">
         <div className="panel-row">
-          <h3 className="title">ProLink Repository</h3>
+          <h3 className="title">Repository</h3>
           <a onClick={this.toggleOptions} className="info">Options</a>
         </div>
 
