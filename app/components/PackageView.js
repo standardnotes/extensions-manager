@@ -53,7 +53,7 @@ export default class PackageView extends React.Component {
     var updateAvailable = false, installedVersion;
     var localInstallPossible = BridgeManager.get().localComponentInstallationAvailable();
 
-    if(localInstallPossible && component) {
+    if(localInstallPossible && component && component.content.package_info.version) {
       installedVersion = component.content.package_info.version;
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
     }
