@@ -9,7 +9,7 @@ module.exports = {
   entry: {
     "dist" : path.resolve(__dirname, 'app/main.js'),
     "dist.min" : path.resolve(__dirname, 'app/main.js'),
-    "dist" : path.resolve(__dirname, 'app/stylesheets/main.scss'),
+    "dist.css" : path.resolve(__dirname, 'app/stylesheets/main.scss'),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
