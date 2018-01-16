@@ -62,6 +62,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       { from: './app/index.html', to: 'index.html' },
+      { from: './app/index.min.html', to: 'index.min.html' },
     ])
   ]
 };
