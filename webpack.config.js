@@ -5,16 +5,15 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const uglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 
 module.exports = {
-  devtool: 'cheap-source-map',
   entry: {
-    "dist" : path.resolve(__dirname, 'app/main.js'),
-    "dist.min" : path.resolve(__dirname, 'app/main.js'),
+    "dist.js" : path.resolve(__dirname, 'app/main.js'),
+    "dist.min.js" : path.resolve(__dirname, 'app/main.js'),
     "dist.css" : path.resolve(__dirname, 'app/stylesheets/main.scss'),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
-    filename: './[name].js'
+    filename: './[name]'
   },
   devServer: {
     historyApiFallback: true,
