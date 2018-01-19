@@ -6,7 +6,7 @@ export default class Advanced extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {repoUrl: "", extensionUrl: "", showAdvanced: true}
+    this.state = {extensionUrl: "", showForm: false}
 
     this.updateObserver = BridgeManager.get().addUpdateObserver(() => {
       this.reload();
@@ -21,32 +21,29 @@ export default class Advanced extends React.Component {
     this.forceUpdate();
   }
 
-  toggleAdvanced = () => {
-    this.setState((prevState) => {
-      return {showAdvanced: !prevState.showAdvanced}
-    });
+  toggleForm = () => {
+    this.setState({showForm: !this.state.showForm, success: false});
   }
 
-  setInputType(type) {
-    if(this.state.inputType == type) {
-      // Close the panel
-      this.setState({inputType: null});
-    } else {
-      this.setState({inputType: type});
-    }
-  }
-
-  installRepo(url) {
-    BridgeManager.get().installRepoUrl(url);
-    this.setState({url: "", success: true});
-  }
-
-  installPackage(url) {
-    BridgeManager.get().installPackageFromUrl(url, (installed) => {
-      if(installed) {
-        this.setState({url: "", success: installed});
+  downloadPackage(url) {
+    console.log("Downloading url", url);
+    BridgeManager.get().downloadPackageDetails(url, (response) => {
+      if(response.content_type == "SN|Repo") {
+        BridgeManager.get().installRepoUrl(url);
+      } else {
+        this.setState({packageDetails: response});
       }
     });
+  }
+
+  confirmInstallation = () => {
+    BridgeManager.get().installPackage(this.state.packageDetails, (installed) => {
+      this.setState({url: installed ? null : this.state.url, showForm: !installed, success: installed, packageDetails: null});
+    })
+  }
+
+  cancelInstallation = () => {
+    this.setState({packageDetails: null, showForm: false, url: null});
   }
 
   handleInputChange = (event) => {
@@ -55,11 +52,7 @@ export default class Advanced extends React.Component {
 
   handleKeyPress = (e) => {
     if(e.key === 'Enter') {
-      if(this.state.inputType == "package") {
-        this.installPackage(this.state.url);
-      } else {
-        this.installRepo(this.state.url);
-      }
+      this.downloadPackage(this.state.url);
     }
   }
 
@@ -67,32 +60,97 @@ export default class Advanced extends React.Component {
     this.setState({url: event.target.value});
   }
 
-  toggleManage = () => {
-    this.setState((prevState) => {
-      return {showManage: !prevState.showManage}
-    });
-  }
-
-
   render() {
     var extensions = BridgeManager.get().allInstalled();
+    var extType, packageDetails = this.state.packageDetails;
+    if(packageDetails) {
+      extType = BridgeManager.get().humanReadableTitleForExtensionType(packageDetails.content_type);
+    }
     return (
       <div className="panel-section no-bottom-pad">
           <div className="horizontal-group">
-            <a onClick={() => {this.setInputType('repo')}} className="info">Import Repository</a>
-            <a onClick={() => {this.setInputType('package')}} className="info">Import Extension</a>
+            <a onClick={this.toggleForm} className="info">Import Extension</a>
           </div>
 
-          {this.state.showAdvanced && this.state.inputType &&
+          {this.state.success &&
+            <div className="panel-row justify-right">
+              <p className="success">Extension successfully installed.</p>
+            </div>
+          }
+
+          {this.state.showForm &&
             <div className="panel-row">
               <input
                 className=""
-                placeholder={this.state.inputType == 'package' ? "Enter Extension Link" : "Enter Repository Link"}
+                placeholder={"Enter Extension Link"}
                 type="url"
                 value={this.state.url}
                 onKeyPress={this.handleKeyPress}
-                onChange={this.handleChange}
+                onChange={this.handleInputChange}
               />
+            </div>
+          }
+
+          {packageDetails &&
+            <div className="notification info panel-row justify-left" style={{textAlign: "center"}}>
+              <div className="panel-column stretch">
+                <h2 className="title">Confirm Installation</h2>
+
+                <div className="panel-row centered">
+                  <div>
+                    <p><strong>Name: </strong></p>
+                    <p>{packageDetails.name}</p>
+                  </div>
+                </div>
+
+                <div className="panel-row centered">
+                  <div>
+                    <p><strong>Description: </strong></p>
+                    <p>{packageDetails.description}</p>
+                  </div>
+                </div>
+
+                {packageDetails.version &&
+                  <div className="panel-row centered">
+                    <div>
+                      <p><strong>Version: </strong></p>
+                      <p>{packageDetails.version}</p>
+                    </div>
+                  </div>
+                }
+
+                <div className="panel-row centered">
+                  <div>
+                    <p><strong>Hosted URL: </strong></p>
+                    <p>{packageDetails.url}</p>
+                  </div>
+                </div>
+
+                {packageDetails.download_url &&
+                  <div className="panel-row centered">
+                    <div>
+                      <p><strong>Download URL: </strong></p>
+                      <p>{packageDetails.download_url}</p>
+                    </div>
+                  </div>
+                }
+
+                <div className="panel-row centered">
+                  <div>
+                    <p><strong>Extension Type: </strong></p>
+                    <p>{extType}</p>
+                  </div>
+                </div>
+
+                <div className="panel-row centered">
+                  <div onClick={this.confirmInstallation} className="button info">
+                    <div className="label">Install</div>
+                  </div>
+                </div>
+                <div className="panel-row centered">
+                  <a className="danger" onClick={this.cancelInstallation}>Cancel</a>
+                </div>
+              </div>
             </div>
           }
 

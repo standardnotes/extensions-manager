@@ -49,7 +49,7 @@ export default class PackageView extends React.Component {
     let p = this.state.packageInfo || (this.component.content.package_info || this.component.content);
     let component = this.component;
     let showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
-    let showActivateOption = component && !showOpenOption && !["editor-editor"].includes(component.content.area);
+    let showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
     var updateAvailable = false, installedVersion;
     var localInstallPossible = BridgeManager.get().localComponentInstallationAvailable();
 

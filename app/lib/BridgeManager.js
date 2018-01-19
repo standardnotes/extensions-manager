@@ -1,5 +1,6 @@
 import ComponentManager from 'sn-components-api';
 import Repo from "../models/Repo.js";
+import HttpManager from "./HttpManager";
 
 export default class BridgeManager {
 
@@ -140,6 +141,16 @@ export default class BridgeManager {
     return result;
   }
 
+  downloadPackageDetails(url, callback) {
+    HttpManager.get().getAbsolute(url, {}, (response) => {
+      console.log("Download package details:", response);
+      callback(response);
+    }, (error) => {
+      console.log("Error downloading package details", error);
+      callback(null, error || {});
+    })
+  }
+
   installPackageFromUrl(url, callback) {
     HttpManager.get().getAbsolute(url, {}, (response) => {
       console.log("Install from url response:", response);
@@ -174,6 +185,7 @@ export default class BridgeManager {
         identifier: aPackage.identifier,
         name: aPackage.name,
         hosted_url: aPackage.url,
+        url: aPackage.url,
         local_url: null,
         area: aPackage.area,
         package_info: aPackage
@@ -211,7 +223,6 @@ export default class BridgeManager {
         run(item);
       });
     }
-
   }
 
   uninstallPackageOffline(aPackage) {
@@ -222,6 +233,22 @@ export default class BridgeManager {
 
   toggleOpenEvent(component) {
     this.componentManager.sendCustomEvent("toggle-activate-component", component);
+  }
+
+  humanReadableTitleForExtensionType(type, pluralize) {
+    let mapping = {
+      "Extension" : "Action",
+      "SF|Extension" : "Server Extension",
+      "SN|Theme" : "Theme",
+      "SN|Editor" : "Editor",
+      "SN|Component" : "Component"
+    }
+
+    var value = mapping[type];
+    if(pluralize) {
+      value += "s";
+    }
+    return value;
   }
 
 }

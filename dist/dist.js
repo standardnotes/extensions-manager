@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,7 +71,7 @@
 
 
 if (true) {
-  module.exports = __webpack_require__(10);
+  module.exports = __webpack_require__(11);
 } else {
   module.exports = require('./cjs/react.development.js');
 }
@@ -97,6 +97,10 @@ var _snComponentsApi2 = _interopRequireDefault(_snComponentsApi);
 var _Repo = __webpack_require__(2);
 
 var _Repo2 = _interopRequireDefault(_Repo);
+
+var _HttpManager = __webpack_require__(7);
+
+var _HttpManager2 = _interopRequireDefault(_HttpManager);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -306,11 +310,22 @@ var BridgeManager = function () {
       return result;
     }
   }, {
+    key: "downloadPackageDetails",
+    value: function downloadPackageDetails(url, callback) {
+      _HttpManager2.default.get().getAbsolute(url, {}, function (response) {
+        console.log("Download package details:", response);
+        callback(response);
+      }, function (error) {
+        console.log("Error downloading package details", error);
+        callback(null, error || {});
+      });
+    }
+  }, {
     key: "installPackageFromUrl",
     value: function installPackageFromUrl(url, callback) {
       var _this2 = this;
 
-      HttpManager.get().getAbsolute(url, {}, function (response) {
+      _HttpManager2.default.get().getAbsolute(url, {}, function (response) {
         console.log("Install from url response:", response);
         _this2.installPackage(response, function (component) {
           callback(component);
@@ -347,6 +362,7 @@ var BridgeManager = function () {
           identifier: aPackage.identifier,
           name: aPackage.name,
           hosted_url: aPackage.url,
+          url: aPackage.url,
           local_url: null,
           area: aPackage.area,
           package_info: aPackage
@@ -401,6 +417,23 @@ var BridgeManager = function () {
     key: "toggleOpenEvent",
     value: function toggleOpenEvent(component) {
       this.componentManager.sendCustomEvent("toggle-activate-component", component);
+    }
+  }, {
+    key: "humanReadableTitleForExtensionType",
+    value: function humanReadableTitleForExtensionType(type, pluralize) {
+      var mapping = {
+        "Extension": "Action",
+        "SF|Extension": "Server Extension",
+        "SN|Theme": "Theme",
+        "SN|Editor": "Editor",
+        "SN|Component": "Component"
+      };
+
+      var value = mapping[type];
+      if (pluralize) {
+        value += "s";
+      }
+      return value;
     }
   }, {
     key: "installedRepos",
@@ -494,7 +527,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _HttpManager = __webpack_require__(24);
+var _HttpManager = __webpack_require__(7);
 
 var _HttpManager2 = _interopRequireDefault(_HttpManager);
 
@@ -662,6 +695,104 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var HttpManager = function () {
+  function HttpManager() {
+    _classCallCheck(this, HttpManager);
+  }
+
+  _createClass(HttpManager, [{
+    key: "postAbsolute",
+    value: function postAbsolute(url, params, onsuccess, onerror) {
+      this.httpRequest("post", url, params, onsuccess, onerror);
+    }
+  }, {
+    key: "patchAbsolute",
+    value: function patchAbsolute(url, params, onsuccess, onerror) {
+      this.httpRequest("patch", url, params, onsuccess, onerror);
+    }
+  }, {
+    key: "getAbsolute",
+    value: function getAbsolute(url, params, onsuccess, onerror) {
+      this.httpRequest("get", url, params, onsuccess, onerror);
+    }
+  }, {
+    key: "httpRequest",
+    value: function httpRequest(verb, url, params, onsuccess, onerror) {
+
+      var xmlhttp = new XMLHttpRequest();
+
+      xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4) {
+          var response = xmlhttp.responseText;
+          if (response) {
+            try {
+              response = JSON.parse(response);
+            } catch (e) {}
+          }
+
+          if (xmlhttp.status >= 200 && xmlhttp.status <= 299) {
+            onsuccess(response);
+          } else {
+            console.error("Request error:", response);
+            onerror(response);
+          }
+        }
+      }.bind(this);
+
+      if (verb == "get" && Object.keys(params).length > 0) {
+        url = url + this.formatParams(params);
+      }
+
+      xmlhttp.open(verb, url, true);
+      xmlhttp.setRequestHeader('Content-type', 'application/json');
+
+      if (verb == "post" || verb == "patch") {
+        xmlhttp.send(JSON.stringify(params));
+      } else {
+        xmlhttp.send();
+      }
+    }
+  }, {
+    key: "formatParams",
+    value: function formatParams(params) {
+      return "?" + Object.keys(params).map(function (key) {
+        return key + "=" + encodeURIComponent(params[key]);
+      }).join("&");
+    }
+  }], [{
+    key: "get",
+    value: function get() {
+      if (this.instance == null) {
+        this.instance = new HttpManager();
+      }
+      return this.instance;
+    }
+
+    /* Singleton */
+
+  }]);
+
+  return HttpManager;
+}();
+
+HttpManager.instance = null;
+exports.default = HttpManager;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
@@ -733,7 +864,7 @@ var PackageView = function (_React$Component) {
       var p = this.state.packageInfo || this.component.content.package_info || this.component.content;
       var component = this.component;
       var showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
-      var showActivateOption = component && !showOpenOption && !["editor-editor"].includes(component.content.area);
+      var showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
       var updateAvailable = false,
           installedVersion;
       var localInstallPossible = _BridgeManager2.default.get().localComponentInstallationAvailable();
@@ -835,7 +966,7 @@ var PackageView = function (_React$Component) {
 exports.default = PackageView;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -855,7 +986,7 @@ var _BridgeManager = __webpack_require__(1);
 
 var _BridgeManager2 = _interopRequireDefault(_BridgeManager);
 
-var _PackageView = __webpack_require__(7);
+var _PackageView = __webpack_require__(8);
 
 var _PackageView2 = _interopRequireDefault(_PackageView);
 
@@ -941,7 +1072,10 @@ var ManageInstalled = function (_React$Component) {
       var serverExtensions = extensions.filter(function (candidate) {
         return candidate.content_type == "SF|Extension";
       });
-      var other = extensions.subtract(themes).subtract(editors).subtract(components).subtract(serverExtensions);
+      var actions = extensions.filter(function (candidate) {
+        return candidate.content_type == "Extension";
+      });
+      var other = extensions.subtract(themes).subtract(editors).subtract(components).subtract(serverExtensions).subtract(actions);
 
       return _react2.default.createElement(
         "div",
@@ -960,6 +1094,7 @@ var ManageInstalled = function (_React$Component) {
         themes.length > 0 && this.category("Themes", themes),
         components.length > 0 && this.category("Components", components),
         editors.length > 0 && this.category("Editors", editors),
+        actions.length > 0 && this.category("Actions", actions),
         serverExtensions.length > 0 && this.category("Server Extensions", serverExtensions),
         other.length > 0 && this.category("Other", other)
       );
@@ -979,7 +1114,7 @@ Array.prototype.subtract = function (a) {
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -989,11 +1124,11 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(11);
+var _reactDom = __webpack_require__(12);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _App = __webpack_require__(21);
+var _App = __webpack_require__(22);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -1002,7 +1137,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _reactDom2.default.render(_react2.default.createElement(_App2.default, null), document.body.appendChild(document.createElement('div')));
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1030,7 +1165,7 @@ isValidElement:K,version:"16.2.0",__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_F
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1068,14 +1203,14 @@ if (true) {
   // DCE check should happen before ReactDOM bundle executes so that
   // DevTools can report bad minification during injection.
   checkDCE();
-  module.exports = __webpack_require__(12);
+  module.exports = __webpack_require__(13);
 } else {
   module.exports = require('./cjs/react-dom.development.js');
 }
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1091,7 +1226,7 @@ if (true) {
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(0),l=__webpack_require__(13),B=__webpack_require__(5),C=__webpack_require__(3),ba=__webpack_require__(14),da=__webpack_require__(15),ea=__webpack_require__(16),fa=__webpack_require__(17),ia=__webpack_require__(20),D=__webpack_require__(6);
+var aa=__webpack_require__(0),l=__webpack_require__(14),B=__webpack_require__(5),C=__webpack_require__(3),ba=__webpack_require__(15),da=__webpack_require__(16),ea=__webpack_require__(17),fa=__webpack_require__(18),ia=__webpack_require__(21),D=__webpack_require__(6);
 function E(a){for(var b=arguments.length-1,c="Minified React error #"+a+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant\x3d"+a,d=0;d<b;d++)c+="\x26args[]\x3d"+encodeURIComponent(arguments[d+1]);b=Error(c+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.");b.name="Invariant Violation";b.framesToPop=1;throw b;}aa?void 0:E("227");
 var oa={children:!0,dangerouslySetInnerHTML:!0,defaultValue:!0,defaultChecked:!0,innerHTML:!0,suppressContentEditableWarning:!0,suppressHydrationWarning:!0,style:!0};function pa(a,b){return(a&b)===b}
 var ta={MUST_USE_PROPERTY:1,HAS_BOOLEAN_VALUE:4,HAS_NUMERIC_VALUE:8,HAS_POSITIVE_NUMERIC_VALUE:24,HAS_OVERLOADED_BOOLEAN_VALUE:32,HAS_STRING_BOOLEAN_VALUE:64,injectDOMPropertyConfig:function(a){var b=ta,c=a.Properties||{},d=a.DOMAttributeNamespaces||{},e=a.DOMAttributeNames||{};a=a.DOMMutationMethods||{};for(var f in c){ua.hasOwnProperty(f)?E("48",f):void 0;var g=f.toLowerCase(),h=c[f];g={attributeName:g,attributeNamespace:null,propertyName:f,mutationMethod:null,mustUseProperty:pa(h,b.MUST_USE_PROPERTY),
@@ -1311,7 +1446,7 @@ Z.injectIntoDevTools({findFiberByHostInstance:pb,bundleType:0,version:"16.2.0",r
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1350,7 +1485,7 @@ var ExecutionEnvironment = {
 module.exports = ExecutionEnvironment;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1430,7 +1565,7 @@ var EventListener = {
 module.exports = EventListener;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1472,7 +1607,7 @@ function getActiveElement(doc) /*?DOMElement*/{
 module.exports = getActiveElement;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1543,7 +1678,7 @@ function shallowEqual(objA, objB) {
 module.exports = shallowEqual;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1558,7 +1693,7 @@ module.exports = shallowEqual;
  * 
  */
 
-var isTextNode = __webpack_require__(18);
+var isTextNode = __webpack_require__(19);
 
 /*eslint-disable no-bitwise */
 
@@ -1586,7 +1721,7 @@ function containsNode(outerNode, innerNode) {
 module.exports = containsNode;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1601,7 +1736,7 @@ module.exports = containsNode;
  * @typechecks
  */
 
-var isNode = __webpack_require__(19);
+var isNode = __webpack_require__(20);
 
 /**
  * @param {*} object The object to check.
@@ -1614,7 +1749,7 @@ function isTextNode(object) {
 module.exports = isTextNode;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1642,7 +1777,7 @@ function isNode(object) {
 module.exports = isNode;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1672,7 +1807,7 @@ function focusNode(node) {
 module.exports = focusNode;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1688,7 +1823,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Home = __webpack_require__(22);
+var _Home = __webpack_require__(23);
 
 var _Home2 = _interopRequireDefault(_Home);
 
@@ -1726,7 +1861,7 @@ var App = function (_React$Component) {
 exports.default = App;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1746,7 +1881,7 @@ var _Repo = __webpack_require__(2);
 
 var _Repo2 = _interopRequireDefault(_Repo);
 
-var _RepoView = __webpack_require__(23);
+var _RepoView = __webpack_require__(24);
 
 var _RepoView2 = _interopRequireDefault(_RepoView);
 
@@ -1762,7 +1897,7 @@ var _Advanced = __webpack_require__(28);
 
 var _Advanced2 = _interopRequireDefault(_Advanced);
 
-var _ManageInstalled = __webpack_require__(8);
+var _ManageInstalled = __webpack_require__(9);
 
 var _ManageInstalled2 = _interopRequireDefault(_ManageInstalled);
 
@@ -1839,7 +1974,7 @@ var Home = function (_React$Component) {
 exports.default = Home;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1867,7 +2002,7 @@ var _BridgeManager = __webpack_require__(1);
 
 var _BridgeManager2 = _interopRequireDefault(_BridgeManager);
 
-var _PackageView = __webpack_require__(7);
+var _PackageView = __webpack_require__(8);
 
 var _PackageView2 = _interopRequireDefault(_PackageView);
 
@@ -1974,104 +2109,6 @@ var RepoView = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = RepoView;
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var HttpManager = function () {
-  function HttpManager() {
-    _classCallCheck(this, HttpManager);
-  }
-
-  _createClass(HttpManager, [{
-    key: "postAbsolute",
-    value: function postAbsolute(url, params, onsuccess, onerror) {
-      this.httpRequest("post", url, params, onsuccess, onerror);
-    }
-  }, {
-    key: "patchAbsolute",
-    value: function patchAbsolute(url, params, onsuccess, onerror) {
-      this.httpRequest("patch", url, params, onsuccess, onerror);
-    }
-  }, {
-    key: "getAbsolute",
-    value: function getAbsolute(url, params, onsuccess, onerror) {
-      this.httpRequest("get", url, params, onsuccess, onerror);
-    }
-  }, {
-    key: "httpRequest",
-    value: function httpRequest(verb, url, params, onsuccess, onerror) {
-
-      var xmlhttp = new XMLHttpRequest();
-
-      xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4) {
-          var response = xmlhttp.responseText;
-          if (response) {
-            try {
-              response = JSON.parse(response);
-            } catch (e) {}
-          }
-
-          if (xmlhttp.status >= 200 && xmlhttp.status <= 299) {
-            onsuccess(response);
-          } else {
-            console.error("Request error:", response);
-            onerror(response);
-          }
-        }
-      }.bind(this);
-
-      if (verb == "get" && Object.keys(params).length > 0) {
-        url = url + this.formatParams(params);
-      }
-
-      xmlhttp.open(verb, url, true);
-      xmlhttp.setRequestHeader('Content-type', 'application/json');
-
-      if (verb == "post" || verb == "patch") {
-        xmlhttp.send(JSON.stringify(params));
-      } else {
-        xmlhttp.send();
-      }
-    }
-  }, {
-    key: "formatParams",
-    value: function formatParams(params) {
-      return "?" + Object.keys(params).map(function (key) {
-        return key + "=" + encodeURIComponent(params[key]);
-      }).join("&");
-    }
-  }], [{
-    key: "get",
-    value: function get() {
-      if (this.instance == null) {
-        this.instance = new HttpManager();
-      }
-      return this.instance;
-    }
-
-    /* Singleton */
-
-  }]);
-
-  return HttpManager;
-}();
-
-HttpManager.instance = null;
-exports.default = HttpManager;
 
 /***/ }),
 /* 25 */
@@ -2690,7 +2727,7 @@ var _BridgeManager = __webpack_require__(1);
 
 var _BridgeManager2 = _interopRequireDefault(_BridgeManager);
 
-var _ManageInstalled = __webpack_require__(8);
+var _ManageInstalled = __webpack_require__(9);
 
 var _ManageInstalled2 = _interopRequireDefault(_ManageInstalled);
 
@@ -2710,10 +2747,18 @@ var Advanced = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (Advanced.__proto__ || Object.getPrototypeOf(Advanced)).call(this, props));
 
-    _this.toggleAdvanced = function () {
-      _this.setState(function (prevState) {
-        return { showAdvanced: !prevState.showAdvanced };
+    _this.toggleForm = function () {
+      _this.setState({ showForm: !_this.state.showForm, success: false });
+    };
+
+    _this.confirmInstallation = function () {
+      _BridgeManager2.default.get().installPackage(_this.state.packageDetails, function (installed) {
+        _this.setState({ url: installed ? null : _this.state.url, showForm: !installed, success: installed, packageDetails: null });
       });
+    };
+
+    _this.cancelInstallation = function () {
+      _this.setState({ packageDetails: null, showForm: false, url: null });
     };
 
     _this.handleInputChange = function (event) {
@@ -2722,11 +2767,7 @@ var Advanced = function (_React$Component) {
 
     _this.handleKeyPress = function (e) {
       if (e.key === 'Enter') {
-        if (_this.state.inputType == "package") {
-          _this.installPackage(_this.state.url);
-        } else {
-          _this.installRepo(_this.state.url);
-        }
+        _this.downloadPackage(_this.state.url);
       }
     };
 
@@ -2734,13 +2775,7 @@ var Advanced = function (_React$Component) {
       _this.setState({ url: event.target.value });
     };
 
-    _this.toggleManage = function () {
-      _this.setState(function (prevState) {
-        return { showManage: !prevState.showManage };
-      });
-    };
-
-    _this.state = { repoUrl: "", extensionUrl: "", showAdvanced: true };
+    _this.state = { extensionUrl: "", showForm: false };
 
     _this.updateObserver = _BridgeManager2.default.get().addUpdateObserver(function () {
       _this.reload();
@@ -2759,38 +2794,28 @@ var Advanced = function (_React$Component) {
       this.forceUpdate();
     }
   }, {
-    key: "setInputType",
-    value: function setInputType(type) {
-      if (this.state.inputType == type) {
-        // Close the panel
-        this.setState({ inputType: null });
-      } else {
-        this.setState({ inputType: type });
-      }
-    }
-  }, {
-    key: "installRepo",
-    value: function installRepo(url) {
-      _BridgeManager2.default.get().installRepoUrl(url);
-      this.setState({ url: "", success: true });
-    }
-  }, {
-    key: "installPackage",
-    value: function installPackage(url) {
+    key: "downloadPackage",
+    value: function downloadPackage(url) {
       var _this2 = this;
 
-      _BridgeManager2.default.get().installPackageFromUrl(url, function (installed) {
-        if (installed) {
-          _this2.setState({ url: "", success: installed });
+      console.log("Downloading url", url);
+      _BridgeManager2.default.get().downloadPackageDetails(url, function (response) {
+        if (response.content_type == "SN|Repo") {
+          _BridgeManager2.default.get().installRepoUrl(url);
+        } else {
+          _this2.setState({ packageDetails: response });
         }
       });
     }
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
-
       var extensions = _BridgeManager2.default.get().allInstalled();
+      var extType,
+          packageDetails = this.state.packageDetails;
+      if (packageDetails) {
+        extType = _BridgeManager2.default.get().humanReadableTitleForExtensionType(packageDetails.content_type);
+      }
       return _react2.default.createElement(
         "div",
         { className: "panel-section no-bottom-pad" },
@@ -2799,30 +2824,197 @@ var Advanced = function (_React$Component) {
           { className: "horizontal-group" },
           _react2.default.createElement(
             "a",
-            { onClick: function onClick() {
-                _this3.setInputType('repo');
-              }, className: "info" },
-            "Import Repository"
-          ),
-          _react2.default.createElement(
-            "a",
-            { onClick: function onClick() {
-                _this3.setInputType('package');
-              }, className: "info" },
+            { onClick: this.toggleForm, className: "info" },
             "Import Extension"
           )
         ),
-        this.state.showAdvanced && this.state.inputType && _react2.default.createElement(
+        this.state.success && _react2.default.createElement(
+          "div",
+          { className: "panel-row justify-right" },
+          _react2.default.createElement(
+            "p",
+            { className: "success" },
+            "Extension successfully installed."
+          )
+        ),
+        this.state.showForm && _react2.default.createElement(
           "div",
           { className: "panel-row" },
           _react2.default.createElement("input", {
             className: "",
-            placeholder: this.state.inputType == 'package' ? "Enter Extension Link" : "Enter Repository Link",
+            placeholder: "Enter Extension Link",
             type: "url",
             value: this.state.url,
             onKeyPress: this.handleKeyPress,
-            onChange: this.handleChange
+            onChange: this.handleInputChange
           })
+        ),
+        packageDetails && _react2.default.createElement(
+          "div",
+          { className: "notification info panel-row justify-left", style: { textAlign: "center" } },
+          _react2.default.createElement(
+            "div",
+            { className: "panel-column stretch" },
+            _react2.default.createElement(
+              "h2",
+              { className: "title" },
+              "Confirm Installation"
+            ),
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                null,
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  _react2.default.createElement(
+                    "strong",
+                    null,
+                    "Name: "
+                  )
+                ),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  packageDetails.name
+                )
+              )
+            ),
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                null,
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  _react2.default.createElement(
+                    "strong",
+                    null,
+                    "Description: "
+                  )
+                ),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  packageDetails.description
+                )
+              )
+            ),
+            packageDetails.version && _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                null,
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  _react2.default.createElement(
+                    "strong",
+                    null,
+                    "Version: "
+                  )
+                ),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  packageDetails.version
+                )
+              )
+            ),
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                null,
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  _react2.default.createElement(
+                    "strong",
+                    null,
+                    "Hosted URL: "
+                  )
+                ),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  packageDetails.url
+                )
+              )
+            ),
+            packageDetails.download_url && _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                null,
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  _react2.default.createElement(
+                    "strong",
+                    null,
+                    "Download URL: "
+                  )
+                ),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  packageDetails.download_url
+                )
+              )
+            ),
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                null,
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  _react2.default.createElement(
+                    "strong",
+                    null,
+                    "Extension Type: "
+                  )
+                ),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  extType
+                )
+              )
+            ),
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "div",
+                { onClick: this.confirmInstallation, className: "button info" },
+                _react2.default.createElement(
+                  "div",
+                  { className: "label" },
+                  "Install"
+                )
+              )
+            ),
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row centered" },
+              _react2.default.createElement(
+                "a",
+                { className: "danger", onClick: this.cancelInstallation },
+                "Cancel"
+              )
+            )
+          )
         )
       );
     }

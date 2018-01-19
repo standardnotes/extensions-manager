@@ -17,8 +17,7 @@ html, body {
   box-shadow: 0px 2px 13px #C8C8C8;
   border-radius: 0.7rem;
   display: flex;
-  flex-direction: column;
-  overflow: hidden; }
+  flex-direction: column; }
 
 .sn-component .panel a:hover {
   text-decoration: underline; }
@@ -58,7 +57,8 @@ html, body {
   padding: 1.6rem 2rem;
   padding-bottom: 0;
   flex-grow: 1;
-  overflow: scroll; }
+  overflow: scroll;
+  height: 100%; }
 
 .sn-component .panel .content p {
   color: #454545;
@@ -114,7 +114,16 @@ html, body {
 .sn-component .panel-row.centered {
   justify-content: center; }
 
-.sn-component .panel-row .panel-column {
+.sn-component .panel-row.justify-right {
+  justify-content: flex-end; }
+
+.sn-component .panel-row.justify-left {
+  justify-content: flex-start; }
+
+.sn-component .panel-row.align-top {
+  align-items: flex-start; }
+
+.sn-component .panel-row .panel-column.stretch {
   width: 100%; }
 
 .sn-component .panel-row.default-padding, .sn-component .panel-row:not(:last-child) {
@@ -144,7 +153,8 @@ html, body {
 .sn-component .menu-panel {
   box-shadow: 0px 4px 4px #C8C8C8;
   border-radius: 0.6rem;
-  overflow: scroll; }
+  overflow: scroll;
+  user-select: none; }
 
 .sn-component .menu-panel .header {
   padding: 0.8rem 1rem;
@@ -462,7 +472,7 @@ html, body {
 
 .sn-component .notification.default {
   background-color: #F6F6F6;
-  border-color: #c4c4c4; }
+  border-color: #DDDDDD; }
 
 .sn-component .notification.info {
   background-color: rgba(8, 109, 214, 0.1);
@@ -597,7 +607,8 @@ html, body {
   background-color: #F6F6F6;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #DDDDDD; }
+  border: 1px solid #DDDDDD;
+  user-select: none; }
 
 .sn-component .app-bar.no-edges {
   border-left: 0;

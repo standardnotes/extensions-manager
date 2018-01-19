@@ -51,7 +51,8 @@ export default class ManageInstalled extends React.Component {
     var editors = extensions.filter((candidate) => {return candidate.content.area == "editor-editor"});
     var components = extensions.filter((candidate) => {return candidate.content_type == "SN|Component" && candidate.content.area != "editor-editor"});
     var serverExtensions = extensions.filter((candidate) => {return candidate.content_type == "SF|Extension"});
-    var other = extensions.subtract(themes).subtract(editors).subtract(components).subtract(serverExtensions);
+    var actions = extensions.filter((candidate) => {return candidate.content_type == "Extension"});
+    var other = extensions.subtract(themes).subtract(editors).subtract(components).subtract(serverExtensions).subtract(actions);
 
     return (
       <div className="panel-section no-border">
@@ -70,6 +71,10 @@ export default class ManageInstalled extends React.Component {
 
         {editors.length > 0 &&
           this.category("Editors", editors)
+        }
+
+        {actions.length > 0 &&
+          this.category("Actions", actions)
         }
 
         {serverExtensions.length > 0 &&
