@@ -354,6 +354,14 @@ var BridgeManager = function () {
       });
     }
   }, {
+    key: "saveItems",
+    value: function saveItems(items, callback) {
+      this.componentManager.saveItems(items, function () {
+        console.log("Save items complete");
+        callback && callback();
+      });
+    }
+  }, {
     key: "createComponentDataForPackage",
     value: function createComponentDataForPackage(aPackage) {
       return {
@@ -2034,20 +2042,72 @@ var RepoView = function (_React$Component) {
 
     _this.state = { packages: [] };
 
+    _this.needsUpdateExpirationDates = true;
+
     _this.repoController = new _RepoController2.default({ repo: props.repo });
     _this.repoController.getPackages(function (packages, error) {
       if (!error) {
         _this.setState({ packages: packages });
+        if (_this.receivedBridgeItems && _this.needsUpdateExpirationDates) {
+          _this.updateExpirationDatesForPackages();
+        }
       }
     });
 
     _this.updateObserver = _BridgeManager2.default.get().addUpdateObserver(function () {
+      _this.receivedBridgeItems = true;
+      if (_this.needsUpdateExpirationDates && _this.state.packages.length > 0) {
+        _this.updateExpirationDatesForPackages();
+      }
       _this.reload();
     });
     return _this;
   }
 
   _createClass(RepoView, [{
+    key: "updateExpirationDatesForPackages",
+    value: function updateExpirationDatesForPackages() {
+      this.needsUpdateExpirationDates = false;
+      // Update expiration dates for packages
+      var needingSave = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.state.packages[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var packageInfo = _step.value;
+
+          var installed = _BridgeManager2.default.get().itemForPackage(packageInfo);
+          if (installed) {
+            var validUntil = new Date(packageInfo.valid_until);
+            // .getTime() must be used to compare dates
+            if (installed.content.valid_until.getTime() !== validUntil.getTime()) {
+              installed.content.valid_until = validUntil;
+              needingSave.push(installed);
+            }
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      if (needingSave.length > 0) {
+        _BridgeManager2.default.get().saveItems(needingSave);
+      }
+    }
+  }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       _BridgeManager2.default.get().removeUpdateObserver(this.updateObserver);

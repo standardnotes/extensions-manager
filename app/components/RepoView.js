@@ -10,16 +10,46 @@ export default class RepoView extends React.Component {
     super(props);
     this.state = {packages: []};
 
+    this.needsUpdateExpirationDates = true;
+
     this.repoController = new RepoController({repo: props.repo});
     this.repoController.getPackages((packages, error) => {
       if(!error) {
         this.setState({packages: packages});
+        if(this.receivedBridgeItems && this.needsUpdateExpirationDates) {
+          this.updateExpirationDatesForPackages();
+        }
       }
     })
 
     this.updateObserver = BridgeManager.get().addUpdateObserver(() => {
+      this.receivedBridgeItems = true;
+      if(this.needsUpdateExpirationDates && this.state.packages.length > 0) {
+        this.updateExpirationDatesForPackages();
+      }
       this.reload();
     })
+  }
+
+  updateExpirationDatesForPackages() {
+    this.needsUpdateExpirationDates = false;
+    // Update expiration dates for packages
+    var needingSave = []
+    for(let packageInfo of this.state.packages) {
+      let installed = BridgeManager.get().itemForPackage(packageInfo);
+      if(installed) {
+        let validUntil = new Date(packageInfo.valid_until);
+        // .getTime() must be used to compare dates
+        if(installed.content.valid_until.getTime() !== validUntil.getTime()) {
+          installed.content.valid_until = validUntil;
+          needingSave.push(installed);
+        }
+      }
+    }
+
+    if(needingSave.length > 0) {
+      BridgeManager.get().saveItems(needingSave);
+    }
   }
 
   componentWillUnmount() {

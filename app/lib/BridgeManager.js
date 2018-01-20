@@ -178,6 +178,13 @@ export default class BridgeManager {
     });
   }
 
+  saveItems(items, callback) {
+    this.componentManager.saveItems(items, () => {
+      console.log("Save items complete");
+      callback && callback();
+    })
+  }
+
   createComponentDataForPackage(aPackage) {
     return {
       content_type: aPackage.content_type,
