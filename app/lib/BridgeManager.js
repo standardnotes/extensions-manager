@@ -180,7 +180,6 @@ export default class BridgeManager {
 
   saveItems(items, callback) {
     this.componentManager.saveItems(items, () => {
-      console.log("Save items complete");
       callback && callback();
     })
   }

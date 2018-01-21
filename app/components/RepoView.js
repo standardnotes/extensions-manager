@@ -87,7 +87,7 @@ export default class RepoView extends React.Component {
         <div className="panel-row">
           <div className="packages panel-table">
             {this.state.packages.map((p, index) =>
-              <div className="table-item">
+              <div className="package table-item">
                 <PackageView key={p.identifier} packageInfo={p} />
               </div>
             )}

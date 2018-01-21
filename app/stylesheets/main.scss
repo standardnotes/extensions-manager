@@ -1,5 +1,5 @@
 html, body {
-  font-size: 17px;
+  font-size: 16px;
   margin: 0;
 }
 
@@ -10,6 +10,32 @@ html, body {
   .footer {
     font-size: 15px;
   }
+}
+
+.package {
+  label {
+    font-size: 1rem !important;
+  }
+
+  .name-input {
+    font-size: 0.95rem;
+    font-weight: bold;
+
+    &[type="text"][disabled] {
+       color: black;
+    }
+  }
+}
+
+.item-advanced-options {
+  margin-top: 15px;
+}
+
+input.disguised {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 1rem !important;
 }
 
 @import '~stylekit';

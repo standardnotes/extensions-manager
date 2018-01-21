@@ -41,6 +41,47 @@ export default class PackageView extends React.Component {
     win.focus();
   }
 
+  toggleOptions = () => {
+    this.setState({showOptions: !this.state.showOptions});
+  }
+
+  toggleRename = () => {
+    this.setState((prevState) => {
+      if(prevState.rename) {
+        return {rename: false, renameValue: null};
+      } else {
+        return {rename: true, renameValue: this.component.content.name};
+      }
+    });
+
+    setTimeout(() => {
+      if(this.state.rename) {
+        this.nameInput.focus();
+        this.nameInput.select();
+      }
+    }, 10);
+  }
+
+  handleKeyPress = (e) => {
+    if(e.key === 'Enter') {
+      this.toggleRename();
+      let name = this.state.renameValue;
+      if(name.length > 0) {
+        this.component.content.name = name;
+        BridgeManager.get().saveItems([this.component]);
+      }
+    }
+  }
+
+  toggleComponentOption = (option) => {
+    this.component.content[option] = !this.component.content[option];
+    BridgeManager.get().saveItems([this.component]);
+  }
+
+  handleChange = (event) => {
+    this.setState({renameValue: event.target.value});
+  }
+
   get component() {
     return this.props.component || BridgeManager.get().itemForPackage(this.props.packageInfo)
   }
@@ -65,7 +106,15 @@ export default class PackageView extends React.Component {
               <img src={p.thumbnail_url} />
             }
 
-            <h4><strong>{p.name}</strong></h4>
+            <input
+              ref={(input) => { this.nameInput = input; }}
+              type="text"
+              className="disguised name-input"
+              disabled={!this.state.rename}
+              value={this.state.renameValue || p.name}
+              onKeyPress={this.handleKeyPress}
+              onChange={this.handleChange}
+            />
 
             {!this.props.hideMeta &&
               <p>{p.description}</p>
@@ -114,12 +163,34 @@ export default class PackageView extends React.Component {
               </div>
             }
 
+            {component &&
+              <div className="button default" onClick={this.toggleOptions}>
+                •••
+              </div>
+            }
+
             {p.marketing_url &&
               <div className="button default" onClick={() => {this.openUrl(p.marketing_url)}}>
                 Info
               </div>
             }
           </div>
+
+          {this.state.showOptions &&
+            <div className="item-advanced-options">
+              <label>
+                <input checked={!component.content.autoupdateDisabled} onChange={() => {this.toggleComponentOption('autoupdateDisabled')}} type="checkbox" />
+                Autoupdate local installation
+              </label>
+
+              <label>
+                <input checked={!component.content.offlineOnly} onChange={() => {this.toggleComponentOption('offlineOnly')}} type="checkbox" />
+                Use hosted when local is unavailable
+              </label>
+
+              <a className="info" onClick={this.toggleRename}>{this.state.rename ? 'Press enter to submit' : 'Rename'}</a>
+            </div>
+          }
         </div>
     ]
   }
