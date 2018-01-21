@@ -207,6 +207,9 @@ export default class BridgeManager {
   }
 
   uninstallComponent(component) {
+    if(component.content.active) {
+      this.toggleOpenEvent(component);
+    }
     this.componentManager.deleteItem(component);
   }
 
