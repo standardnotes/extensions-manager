@@ -101,7 +101,7 @@ export default class PackageView extends React.Component {
 
     return [
         <div className="item-content">
-          <div className="item-column">
+          <div className="item-column stretch">
             {p.thumbnail_url && !this.props.hideMeta &&
               <img src={p.thumbnail_url} />
             }

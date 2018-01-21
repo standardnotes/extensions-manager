@@ -194,7 +194,8 @@ export default class BridgeManager {
         url: aPackage.url,
         local_url: null,
         area: aPackage.area,
-        package_info: aPackage
+        package_info: aPackage,
+        valid_until: aPackage.valid_until
       }
     };
   }
