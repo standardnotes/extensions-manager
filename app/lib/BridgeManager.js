@@ -30,7 +30,6 @@ export default class BridgeManager {
     });
 
     this.componentManager.acceptsThemes = false;
-
     // this.componentManager.setSize("container", 800, 500);
   }
 
@@ -87,7 +86,6 @@ export default class BridgeManager {
     }
 
     if(this.installedRepos.length > 0) {
-      console.log("Setting container size");
       this.componentManager.setSize("container", 800, 700);
     } else {
       this.componentManager.setSize("container", 800, 500);
