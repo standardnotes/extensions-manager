@@ -93,9 +93,10 @@ export default class PackageView extends React.Component {
     let showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
     var updateAvailable = false, installedVersion;
     var localInstallPossible = BridgeManager.get().localComponentInstallationAvailable();
+    var componentPackageInfo = component && component.content.package_info;
 
-    if(localInstallPossible && component && component.content.package_info.version) {
-      installedVersion = component.content.package_info.version;
+    if(localInstallPossible && componentPackageInfo && componentPackageInfo.version) {
+      installedVersion = componentPackageInfo.version;
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
     }
 

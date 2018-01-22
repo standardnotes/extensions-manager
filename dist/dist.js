@@ -921,9 +921,10 @@ var PackageView = function (_React$Component) {
       var updateAvailable = false,
           installedVersion;
       var localInstallPossible = _BridgeManager2.default.get().localComponentInstallationAvailable();
+      var componentPackageInfo = component && component.content.package_info;
 
-      if (localInstallPossible && component && component.content.package_info.version) {
-        installedVersion = component.content.package_info.version;
+      if (localInstallPossible && componentPackageInfo && componentPackageInfo.version) {
+        installedVersion = componentPackageInfo.version;
         updateAvailable = compareVersions(p.version, installedVersion) == 1;
       }
 
