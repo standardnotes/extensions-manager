@@ -144,7 +144,7 @@ var BridgeManager = function () {
 
       this.componentManager.acceptsThemes = false;
 
-      this.componentManager.setSize("container", 800, 500);
+      // this.componentManager.setSize("container", 800, 500);
     }
   }, {
     key: "didBeginStreaming",
@@ -251,7 +251,10 @@ var BridgeManager = function () {
       }
 
       if (this.installedRepos.length > 0) {
+        console.log("Setting container size");
         this.componentManager.setSize("container", 800, 700);
+      } else {
+        this.componentManager.setSize("container", 800, 500);
       }
     }
   }, {
@@ -357,7 +360,6 @@ var BridgeManager = function () {
     key: "saveItems",
     value: function saveItems(items, callback) {
       this.componentManager.saveItems(items, function () {
-        console.log("Save items complete");
         callback && callback();
       });
     }
@@ -373,7 +375,8 @@ var BridgeManager = function () {
           url: aPackage.url,
           local_url: null,
           area: aPackage.area,
-          package_info: aPackage
+          package_info: aPackage,
+          valid_until: aPackage.valid_until
         }
       };
     }
@@ -387,6 +390,9 @@ var BridgeManager = function () {
   }, {
     key: "uninstallComponent",
     value: function uninstallComponent(component) {
+      if (component.content.active) {
+        this.toggleOpenEvent(component);
+      }
       this.componentManager.deleteItem(component);
     }
   }, {
@@ -860,6 +866,47 @@ var PackageView = function (_React$Component) {
       win.focus();
     };
 
+    _this.toggleOptions = function () {
+      _this.setState({ showOptions: !_this.state.showOptions });
+    };
+
+    _this.toggleRename = function () {
+      _this.setState(function (prevState) {
+        if (prevState.rename) {
+          return { rename: false, renameValue: null };
+        } else {
+          return { rename: true, renameValue: _this.component.content.name };
+        }
+      });
+
+      setTimeout(function () {
+        if (_this.state.rename) {
+          _this.nameInput.focus();
+          _this.nameInput.select();
+        }
+      }, 10);
+    };
+
+    _this.handleKeyPress = function (e) {
+      if (e.key === 'Enter') {
+        _this.toggleRename();
+        var name = _this.state.renameValue;
+        if (name.length > 0) {
+          _this.component.content.name = name;
+          _BridgeManager2.default.get().saveItems([_this.component]);
+        }
+      }
+    };
+
+    _this.toggleComponentOption = function (option) {
+      _this.component.content[option] = !_this.component.content[option];
+      _BridgeManager2.default.get().saveItems([_this.component]);
+    };
+
+    _this.handleChange = function (event) {
+      _this.setState({ renameValue: event.target.value });
+    };
+
     _this.state = { packageInfo: props.packageInfo, component: props.component };
     return _this;
   }
@@ -887,17 +934,19 @@ var PackageView = function (_React$Component) {
         { className: "item-content" },
         _react2.default.createElement(
           "div",
-          { className: "item-column" },
+          { className: "item-column stretch" },
           p.thumbnail_url && !this.props.hideMeta && _react2.default.createElement("img", { src: p.thumbnail_url }),
-          _react2.default.createElement(
-            "h4",
-            null,
-            _react2.default.createElement(
-              "strong",
-              null,
-              p.name
-            )
-          ),
+          _react2.default.createElement("input", {
+            ref: function ref(input) {
+              _this2.nameInput = input;
+            },
+            type: "text",
+            className: "disguised name-input",
+            disabled: !this.state.rename,
+            value: this.state.renameValue || p.name,
+            onKeyPress: this.handleKeyPress,
+            onChange: this.handleChange
+          }),
           !this.props.hideMeta && _react2.default.createElement(
             "p",
             null,
@@ -946,12 +995,42 @@ var PackageView = function (_React$Component) {
             { className: "button danger", onClick: this.togglePackageInstallation },
             "Uninstall"
           ),
+          component && _react2.default.createElement(
+            "div",
+            { className: "button default", onClick: this.toggleOptions },
+            "\u2022\u2022\u2022"
+          ),
           p.marketing_url && _react2.default.createElement(
             "div",
             { className: "button default", onClick: function onClick() {
                 _this2.openUrl(p.marketing_url);
               } },
             "Info"
+          )
+        ),
+        this.state.showOptions && _react2.default.createElement(
+          "div",
+          { className: "item-advanced-options" },
+          _react2.default.createElement(
+            "label",
+            null,
+            _react2.default.createElement("input", { checked: !component.content.autoupdateDisabled, onChange: function onChange() {
+                _this2.toggleComponentOption('autoupdateDisabled');
+              }, type: "checkbox" }),
+            "Autoupdate local installation"
+          ),
+          _react2.default.createElement(
+            "label",
+            null,
+            _react2.default.createElement("input", { checked: !component.content.offlineOnly, onChange: function onChange() {
+                _this2.toggleComponentOption('offlineOnly');
+              }, type: "checkbox" }),
+            "Use hosted when local is unavailable"
+          ),
+          _react2.default.createElement(
+            "a",
+            { className: "info", onClick: this.toggleRename },
+            this.state.rename ? 'Press enter to submit' : 'Rename'
           )
         )
       )];
@@ -1038,7 +1117,7 @@ var ManageInstalled = function (_React$Component) {
           extensions.map(function (ext, index) {
             return _react2.default.createElement(
               "div",
-              { className: "table-item" },
+              { className: "package table-item" },
               _react2.default.createElement(_PackageView2.default, { key: ext.uuid, component: ext, hideMeta: true })
             );
           })
@@ -2155,7 +2234,7 @@ var RepoView = function (_React$Component) {
             this.state.packages.map(function (p, index) {
               return _react2.default.createElement(
                 "div",
-                { className: "table-item" },
+                { className: "package table-item" },
                 _react2.default.createElement(_PackageView2.default, { key: p.identifier, packageInfo: p })
               );
             })
@@ -2187,7 +2266,7 @@ var ComponentManager = function () {
 
     this.sentMessages = [];
     this.messageQueue = [];
-    this.permissions = permissions;
+    this.initialPermissions = permissions;
     this.loggingEnabled = false;
     this.acceptsThemes = true;
     this.onReadyCallback = onReady;
@@ -2232,6 +2311,10 @@ var ComponentManager = function () {
   }, {
     key: "onReady",
     value: function onReady(data) {
+      if (this.initialPermissions && this.initialPermissions.length > 0) {
+        this.requestPermissions(this.initialPermissions);
+      }
+
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -2303,7 +2386,6 @@ var ComponentManager = function () {
         data: data,
         messageId: this.generateUUID(),
         sessionKey: this.sessionKey,
-        permissions: this.permissions,
         api: "component"
       };
 
@@ -2321,6 +2403,13 @@ var ComponentManager = function () {
     key: "setSize",
     value: function setSize(type, width, height) {
       this.postMessage("set-size", { type: type, width: width, height: height }, function (data) {});
+    }
+  }, {
+    key: "requestPermissions",
+    value: function requestPermissions(permissions, callback) {
+      this.postMessage("request-permissions", { permissions: permissions }, function (data) {
+        callback && callback();
+      }.bind(this));
     }
   }, {
     key: "streamItems",
@@ -2404,12 +2493,12 @@ var ComponentManager = function () {
     }
   }, {
     key: "saveItem",
-    value: function saveItem(item) {
-      this.saveItems([item]);
+    value: function saveItem(item, callback) {
+      this.saveItems([item], callback);
     }
   }, {
     key: "saveItems",
-    value: function saveItems(items) {
+    value: function saveItems(items, callback) {
       var _this2 = this;
 
       items = items.map(function (item) {
@@ -2418,7 +2507,9 @@ var ComponentManager = function () {
       }.bind(this));
 
       var saveBlock = function saveBlock() {
-        _this2.postMessage("save-items", { items: items }, function (data) {});
+        _this2.postMessage("save-items", { items: items }, function (data) {
+          callback && callback();
+        });
       };
 
       /*
