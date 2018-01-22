@@ -117,6 +117,12 @@ export default class PackageView extends React.Component {
               onChange={this.handleChange}
             />
 
+            {component && !componentPackageInfo &&
+              <div className="notification warning package-notification">
+                <div className="text">Unable to find corresponding package information. Please uninstall this extension, then reinstall to enable local installation and updates.</div>
+              </div>
+            }
+
             {!this.props.hideMeta &&
               <p>{p.description}</p>
             }
@@ -164,7 +170,7 @@ export default class PackageView extends React.Component {
               </div>
             }
 
-            {component &&
+            {component && componentPackageInfo &&
               <div className="button default" onClick={this.toggleOptions}>
                 •••
               </div>

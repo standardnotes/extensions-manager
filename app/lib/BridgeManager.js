@@ -133,12 +133,18 @@ export default class BridgeManager {
     return this.itemForPackage(aPackage);
   }
 
-  itemForPackage(aPackage) {
-    var result = this.items.filter((item) => {
+  itemForPackage(packageInfo) {
+    var result = this.items.find((item) => {
+      if(!item.content.package_info) {
+        // Legacy component without package_info, search by url or name
+        // We also check if the item content url contains the substring that is packageInfo, since
+        // newer URL formats remove extraneous query params from the end
+        return item.content.url == packageInfo.url || item.content.url.includes(packageInfo.url) || item.content.name == packageInfo.name;
+      }
       return item.content.package_info
       && !item.deleted
-      && item.content.package_info.identifier == aPackage.identifier
-    })[0];
+      && item.content.package_info.identifier == packageInfo.identifier
+    });
     return result;
   }
 

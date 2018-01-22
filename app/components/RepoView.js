@@ -10,38 +10,48 @@ export default class RepoView extends React.Component {
     super(props);
     this.state = {packages: []};
 
-    this.needsUpdateExpirationDates = true;
+    this.needsUpdateComponents = true;
 
     this.repoController = new RepoController({repo: props.repo});
     this.repoController.getPackages((packages, error) => {
       if(!error) {
         this.setState({packages: packages});
-        if(this.receivedBridgeItems && this.needsUpdateExpirationDates) {
-          this.updateExpirationDatesForPackages();
+        if(this.receivedBridgeItems && this.needsUpdateComponents) {
+          this.updateComponentsWithNewPackageInfo();
         }
       }
     })
 
     this.updateObserver = BridgeManager.get().addUpdateObserver(() => {
       this.receivedBridgeItems = true;
-      if(this.needsUpdateExpirationDates && this.state.packages.length > 0) {
-        this.updateExpirationDatesForPackages();
+      if(this.needsUpdateComponents && this.state.packages.length > 0) {
+        this.updateComponentsWithNewPackageInfo();
       }
       this.reload();
     })
   }
 
-  updateExpirationDatesForPackages() {
-    this.needsUpdateExpirationDates = false;
+  updateComponentsWithNewPackageInfo() {
+    this.needsUpdateComponents = false;
     // Update expiration dates for packages
     var needingSave = []
     for(let packageInfo of this.state.packages) {
       let installed = BridgeManager.get().itemForPackage(packageInfo);
       if(installed) {
+        var needsSave = false;
         let validUntil = new Date(packageInfo.valid_until);
         // .getTime() must be used to compare dates
-        if(installed.content.valid_until.getTime() !== validUntil.getTime()) {
+        if(!installed.content.valid_until || (installed.content.valid_until.getTime() !== validUntil.getTime())) {
           installed.content.valid_until = validUntil;
+          needsSave = true;
+        }
+
+        if(!installed.content.package_info || installed.content.package_info !== packageInfo) {
+          installed.content.package_info = packageInfo;
+          needsSave = true;
+        }
+
+        if(needsSave) {
           needingSave.push(installed);
         }
       }
