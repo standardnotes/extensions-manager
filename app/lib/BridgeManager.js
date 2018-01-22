@@ -33,6 +33,10 @@ export default class BridgeManager {
     // this.componentManager.setSize("container", 800, 500);
   }
 
+  getSelfComponentUUID() {
+    return this.componentManager.getSelfComponentUUID();
+  }
+
   didBeginStreaming() {
     return this._didBeginStreaming;
   }
@@ -209,12 +213,11 @@ export default class BridgeManager {
 
   uninstallPackage(aPackage) {
     let item = this.itemForPackage(aPackage);
-    console.log("Uninstalling", item);
     this.uninstallComponent(item);
   }
 
   uninstallComponent(component) {
-    if(component.content.active) {
+    if(component.content.active && component.uuid !== this.getSelfComponentUUID()) {
       this.toggleOpenEvent(component);
     }
     this.componentManager.deleteItem(component);
@@ -266,6 +269,27 @@ export default class BridgeManager {
       value += "s";
     }
     return value;
+  }
+
+  nameForNamelessServerExtension(extension) {
+    var url = extension.content.url;
+    if(!url) { return null; }
+
+    if(url.includes("gdrive")) {
+      return "Google Drive Sync";
+    } else if(url.includes("file_attacher")) {
+      return "File Attacher";
+    } else if(url.includes("onedrive")) {
+      return "OneDrive Sync";
+    } else if(url.includes("backup.email_archive")) {
+      return "Daily Email Backups";
+    } else if(url.includes("dropbox")) {
+      return "Dropbox Sync";
+    } else if(url.includes("revisions")) {
+      return "Revision History";
+    } else {
+      return null;
+    }
   }
 
 }

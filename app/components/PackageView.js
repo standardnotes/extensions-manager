@@ -89,8 +89,14 @@ export default class PackageView extends React.Component {
   render() {
     let p = this.state.packageInfo || (this.component.content.package_info || this.component.content);
     let component = this.component;
-    let showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
-    let showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
+    var showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
+    var showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
+
+    if(component && BridgeManager.get().getSelfComponentUUID() == component.uuid) {
+      // Is Extensions Manager (self)
+      showOpenOption = false, showActivateOption = false;
+    }
+
     var updateAvailable = false, installedVersion;
     var localInstallPossible = BridgeManager.get().localComponentInstallationAvailable();
     var componentPackageInfo = component && component.content.package_info;
@@ -98,6 +104,14 @@ export default class PackageView extends React.Component {
     if(localInstallPossible && componentPackageInfo && componentPackageInfo.version) {
       installedVersion = componentPackageInfo.version;
       updateAvailable = compareVersions(p.version, installedVersion) == 1;
+    }
+
+    // Legacy server extensions without name
+    if(component && !component.content.name && component.content_type == "SF|Extension") {
+      var name = BridgeManager.get().nameForNamelessServerExtension(component);
+      if(name) {
+        component.content.name = name;
+      }
     }
 
     return [

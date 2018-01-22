@@ -11,6 +11,14 @@ html, body {
 .package label {
   font-size: 1rem !important; }
 
+.package .package-notification {
+  margin: 0 !important;
+  margin-top: 0.6rem !important;
+  padding: 0.5rem !important; }
+  .package .package-notification .text {
+    font-size: 0.8rem !important;
+    line-height: 1rem !important; }
+
 .package .name-input {
   font-size: 0.95rem;
   font-weight: bold; }

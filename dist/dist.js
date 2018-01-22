@@ -146,6 +146,11 @@ var BridgeManager = function () {
       // this.componentManager.setSize("container", 800, 500);
     }
   }, {
+    key: "getSelfComponentUUID",
+    value: function getSelfComponentUUID() {
+      return this.componentManager.getSelfComponentUUID();
+    }
+  }, {
     key: "didBeginStreaming",
     value: function didBeginStreaming() {
       return this._didBeginStreaming;
@@ -304,10 +309,16 @@ var BridgeManager = function () {
     }
   }, {
     key: "itemForPackage",
-    value: function itemForPackage(aPackage) {
-      var result = this.items.filter(function (item) {
-        return item.content.package_info && !item.deleted && item.content.package_info.identifier == aPackage.identifier;
-      })[0];
+    value: function itemForPackage(packageInfo) {
+      var result = this.items.find(function (item) {
+        if (!item.content.package_info) {
+          // Legacy component without package_info, search by url or name
+          // We also check if the item content url contains the substring that is packageInfo, since
+          // newer URL formats remove extraneous query params from the end
+          return item.content.url == packageInfo.url || item.content.url.includes(packageInfo.url) || item.content.name == packageInfo.name;
+        }
+        return item.content.package_info && !item.deleted && item.content.package_info.identifier == packageInfo.identifier;
+      });
       return result;
     }
   }, {
@@ -382,13 +393,12 @@ var BridgeManager = function () {
     key: "uninstallPackage",
     value: function uninstallPackage(aPackage) {
       var item = this.itemForPackage(aPackage);
-      console.log("Uninstalling", item);
       this.uninstallComponent(item);
     }
   }, {
     key: "uninstallComponent",
     value: function uninstallComponent(component) {
-      if (component.content.active) {
+      if (component.content.active && component.uuid !== this.getSelfComponentUUID()) {
         this.toggleOpenEvent(component);
       }
       this.componentManager.deleteItem(component);
@@ -446,6 +456,30 @@ var BridgeManager = function () {
         value += "s";
       }
       return value;
+    }
+  }, {
+    key: "nameForNamelessServerExtension",
+    value: function nameForNamelessServerExtension(extension) {
+      var url = extension.content.url;
+      if (!url) {
+        return null;
+      }
+
+      if (url.includes("gdrive")) {
+        return "Google Drive Sync";
+      } else if (url.includes("file_attacher")) {
+        return "File Attacher";
+      } else if (url.includes("onedrive")) {
+        return "OneDrive Sync";
+      } else if (url.includes("backup.email_archive")) {
+        return "Daily Email Backups";
+      } else if (url.includes("dropbox")) {
+        return "Dropbox Sync";
+      } else if (url.includes("revisions")) {
+        return "Revision History";
+      } else {
+        return null;
+      }
     }
   }, {
     key: "installedRepos",
@@ -918,6 +952,12 @@ var PackageView = function (_React$Component) {
       var component = this.component;
       var showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
       var showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
+
+      if (component && _BridgeManager2.default.get().getSelfComponentUUID() == component.uuid) {
+        // Is Extensions Manager (self)
+        showOpenOption = false, showActivateOption = false;
+      }
+
       var updateAvailable = false,
           installedVersion;
       var localInstallPossible = _BridgeManager2.default.get().localComponentInstallationAvailable();
@@ -926,6 +966,14 @@ var PackageView = function (_React$Component) {
       if (localInstallPossible && componentPackageInfo && componentPackageInfo.version) {
         installedVersion = componentPackageInfo.version;
         updateAvailable = compareVersions(p.version, installedVersion) == 1;
+      }
+
+      // Legacy server extensions without name
+      if (component && !component.content.name && component.content_type == "SF|Extension") {
+        var name = _BridgeManager2.default.get().nameForNamelessServerExtension(component);
+        if (name) {
+          component.content.name = name;
+        }
       }
 
       return [_react2.default.createElement(
@@ -946,6 +994,15 @@ var PackageView = function (_React$Component) {
             onKeyPress: this.handleKeyPress,
             onChange: this.handleChange
           }),
+          component && !componentPackageInfo && _react2.default.createElement(
+            "div",
+            { className: "notification warning package-notification" },
+            _react2.default.createElement(
+              "div",
+              { className: "text" },
+              "Unable to find corresponding package information. Please uninstall this extension, then reinstall to enable local installation and updates."
+            )
+          ),
           !this.props.hideMeta && _react2.default.createElement(
             "p",
             null,
@@ -994,7 +1051,7 @@ var PackageView = function (_React$Component) {
             { className: "button danger", onClick: this.togglePackageInstallation },
             "Uninstall"
           ),
-          component && _react2.default.createElement(
+          component && componentPackageInfo && _react2.default.createElement(
             "div",
             { className: "button default", onClick: this.toggleOptions },
             "\u2022\u2022\u2022"
@@ -2120,22 +2177,22 @@ var RepoView = function (_React$Component) {
 
     _this.state = { packages: [] };
 
-    _this.needsUpdateExpirationDates = true;
+    _this.needsUpdateComponents = true;
 
     _this.repoController = new _RepoController2.default({ repo: props.repo });
     _this.repoController.getPackages(function (packages, error) {
       if (!error) {
         _this.setState({ packages: packages });
-        if (_this.receivedBridgeItems && _this.needsUpdateExpirationDates) {
-          _this.updateExpirationDatesForPackages();
+        if (_this.receivedBridgeItems && _this.needsUpdateComponents) {
+          _this.updateComponentsWithNewPackageInfo();
         }
       }
     });
 
     _this.updateObserver = _BridgeManager2.default.get().addUpdateObserver(function () {
       _this.receivedBridgeItems = true;
-      if (_this.needsUpdateExpirationDates && _this.state.packages.length > 0) {
-        _this.updateExpirationDatesForPackages();
+      if (_this.needsUpdateComponents && _this.state.packages.length > 0) {
+        _this.updateComponentsWithNewPackageInfo();
       }
       _this.reload();
     });
@@ -2143,9 +2200,9 @@ var RepoView = function (_React$Component) {
   }
 
   _createClass(RepoView, [{
-    key: "updateExpirationDatesForPackages",
-    value: function updateExpirationDatesForPackages() {
-      this.needsUpdateExpirationDates = false;
+    key: "updateComponentsWithNewPackageInfo",
+    value: function updateComponentsWithNewPackageInfo() {
+      this.needsUpdateComponents = false;
       // Update expiration dates for packages
       var needingSave = [];
       var _iteratorNormalCompletion = true;
@@ -2158,10 +2215,20 @@ var RepoView = function (_React$Component) {
 
           var installed = _BridgeManager2.default.get().itemForPackage(packageInfo);
           if (installed) {
+            var needsSave = false;
             var validUntil = new Date(packageInfo.valid_until);
             // .getTime() must be used to compare dates
-            if (installed.content.valid_until.getTime() !== validUntil.getTime()) {
+            if (!installed.content.valid_until || installed.content.valid_until.getTime() !== validUntil.getTime()) {
               installed.content.valid_until = validUntil;
+              needsSave = true;
+            }
+
+            if (!installed.content.package_info || installed.content.package_info !== packageInfo) {
+              installed.content.package_info = packageInfo;
+              needsSave = true;
+            }
+
+            if (needsSave) {
               needingSave.push(installed);
             }
           }
@@ -2341,10 +2408,16 @@ var ComponentManager = function () {
 
       this.messageQueue = [];
       this.environment = data.environment;
+      this.uuid = data.uuid;
 
       if (this.onReadyCallback) {
         this.onReadyCallback();
       }
+    }
+  }, {
+    key: "getSelfComponentUUID",
+    value: function getSelfComponentUUID() {
+      return this.uuid;
     }
   }, {
     key: "isRunningInDesktopApplication",
@@ -2948,7 +3021,6 @@ var Advanced = function (_React$Component) {
     value: function downloadPackage(url) {
       var _this2 = this;
 
-      console.log("Downloading url", url);
       _BridgeManager2.default.get().downloadPackageDetails(url, function (response) {
         if (response.content_type == "SN|Repo") {
           _BridgeManager2.default.get().installRepoUrl(url);
