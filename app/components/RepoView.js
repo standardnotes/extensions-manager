@@ -15,6 +15,7 @@ export default class RepoView extends React.Component {
     this.repoController = new RepoController({repo: props.repo});
     this.repoController.getPackages((packages, error) => {
       if(!error) {
+        BridgeManager.get().registerPackages(packages);
         this.setState({packages: packages});
         if(this.receivedBridgeItems && this.needsUpdateComponents) {
           this.updateComponentsWithNewPackageInfo();
@@ -46,7 +47,12 @@ export default class RepoView extends React.Component {
           needsSave = true;
         }
 
-        if(!installed.content.package_info || installed.content.package_info !== packageInfo) {
+
+        /*
+        As part of the below condition, we used to also have if(JSON.stringify(installed.content.package_info) !== JSON.stringify(packageInfo))
+        to copy over package info. However, if the repo updates a version, then the installed component's version would also update without
+        */
+        if(!installed.content.package_info) {
           installed.content.package_info = packageInfo;
           needsSave = true;
         }
@@ -59,6 +65,8 @@ export default class RepoView extends React.Component {
 
     if(needingSave.length > 0) {
       BridgeManager.get().saveItems(needingSave);
+    } else {
+      BridgeManager.get().notifyObserversOfUpdate();
     }
   }
 

@@ -14,23 +14,28 @@ export default class BridgeManager {
   constructor(onReceieveItems) {
     this.updateObservers = [];
     this.items = [];
+    this.packages = [];
+    this.size = null;
   }
 
   initiateBridge(onReady) {
-    // var permissions = [
-    //   {
-    //     name: "stream-items",
-    //     content_types: ["SN|Component", "SN|Theme", "SF|Extension", "Extension"]
-    //   }
-    // ]
-
     this.componentManager = new ComponentManager([], () => {
       onReady && onReady();
-      // on ready
     });
 
     this.componentManager.acceptsThemes = false;
-    // this.componentManager.setSize("container", 800, 500);
+  }
+
+  getItemAppDataValue(item, key) {
+    return this.componentManager.getItemAppDataValue(item, key);
+  }
+
+  registerPackages(packages) {
+    this.packages = packages;
+  }
+
+  latestPackageInfoForComponent(component) {
+    return this.packages.find((p) => {return p.identifier == component.content.package_info.identifier});
   }
 
   getSelfComponentUUID() {
@@ -44,7 +49,6 @@ export default class BridgeManager {
   beginStreamingItems() {
     this._didBeginStreaming = true;
     this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], (items) => {
-      // console.log("Prolink received items", items);
       for(var item of items) {
         if(item.deleted) {
           this.removeItemFromItems(item);
@@ -90,9 +94,14 @@ export default class BridgeManager {
     }
 
     if(this.installedRepos.length > 0) {
-      this.componentManager.setSize("container", 800, 700);
+      if(this.size != "tall") {
+        this.size = "tall";
+        this.componentManager.setSize("container", 800, 700);
+      }
     } else {
-      this.componentManager.setSize("container", 800, 500);
+      if(this.size != "short") {
+        this.componentManager.setSize("container", 800, 500);
+      }
     }
   }
 
@@ -140,6 +149,9 @@ export default class BridgeManager {
   itemForPackage(packageInfo) {
     var result = this.items.find((item) => {
       if(!item.content.package_info) {
+        if(!item.content.url) {
+          return false;
+        }
         // Legacy component without package_info, search by url or name
         // We also check if the item content url contains the substring that is packageInfo, since
         // newer URL formats remove extraneous query params from the end
@@ -154,7 +166,6 @@ export default class BridgeManager {
 
   downloadPackageDetails(url, callback) {
     HttpManager.get().getAbsolute(url, {}, (response) => {
-      console.log("Download package details:", response);
       callback(response);
     }, (error) => {
       console.log("Error downloading package details", error);
@@ -164,7 +175,6 @@ export default class BridgeManager {
 
   installPackageFromUrl(url, callback) {
     HttpManager.get().getAbsolute(url, {}, (response) => {
-      console.log("Install from url response:", response);
       this.installPackage(response, (component) => {
         callback(component);
       })
@@ -176,16 +186,9 @@ export default class BridgeManager {
   }
 
   installPackage(aPackage, callback) {
-    console.log("Installing", aPackage);
-    this.componentManager.createItem(this.createComponentDataForPackage(aPackage), (component) => {
-      if(this.localComponentInstallationAvailable()) {
-        this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {
-          console.log("Prolink Installed Local component", installedComponent);
-          callback && callback(component);
-        });
-      } else {
-        callback && callback(component);
-      }
+    let data = this.createComponentDataForPackage(aPackage);
+    this.componentManager.createItem(data, (component) => {
+      callback && callback(component);
     });
   }
 
@@ -217,37 +220,28 @@ export default class BridgeManager {
   }
 
   uninstallComponent(component) {
-    if(component.content.active && component.uuid !== this.getSelfComponentUUID()) {
-      this.toggleOpenEvent(component);
+    if(component.content.active
+      && component.uuid !== this.getSelfComponentUUID()
+      && component.content.area !== "modal") {
+        // modals can be marked 'active' even if they are invisible, in the case the user closes the window without dismissing it
+        this.toggleOpenEvent(component);
     }
     this.componentManager.deleteItem(component);
   }
 
-  installPackageOffline(aPackage) {
-    console.log("Installing offline", aPackage);
+  updateComponent(component) {
+    let latestPackageInfo = this.latestPackageInfoForComponent(component);;
 
-    var run = (component) => {
+    component.content.package_info.download_url = latestPackageInfo.download_url;
+
+    this.componentManager.saveItems([component], () => {
       this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {
-        console.log("Prolink Installed Local component", installedComponent);
       });
-    }
-
-    var existingComponent = this.itemForPackage(aPackage, true);
-    if(existingComponent) {
-      existingComponent.content.package_info = aPackage;
-      run(existingComponent);
-    } else {
-      let data = this.createComponentDataForPackage(aPackage);
-      this.componentManager.createItem(data, (item) => {
-        console.log("installPackageOffline createItem response", item);
-        run(item);
-      });
-    }
+    })
   }
 
   uninstallPackageOffline(aPackage) {
     let item = this.itemForPackage(aPackage, true);
-    console.log("Uninstalling offline", item);
     this.componentManager.deleteItem(item);
   }
 

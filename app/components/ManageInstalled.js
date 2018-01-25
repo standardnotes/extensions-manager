@@ -31,6 +31,9 @@ export default class ManageInstalled extends React.Component {
   }
 
   category = (title, extensions) => {
+    extensions = extensions.sort((a, b) => {
+      return a.content.name > b.content.name;
+    });
     return (
       <div className="panel-section">
         <h4 className="title panel-row">{title} ({extensions.length})</h4>

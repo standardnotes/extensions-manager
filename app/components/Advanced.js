@@ -83,6 +83,7 @@ export default class Advanced extends React.Component {
                 className=""
                 placeholder={"Enter Extension Link"}
                 type="url"
+                autoFocus={true}
                 value={this.state.url}
                 onKeyPress={this.handleKeyPress}
                 onChange={this.handleInputChange}

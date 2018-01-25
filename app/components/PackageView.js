@@ -33,7 +33,7 @@ export default class PackageView extends React.Component {
   }
 
   updateComponent = () => {
-    BridgeManager.get().installPackageOffline(this.packageInfo);
+    BridgeManager.get().updateComponent(this.component);
   }
 
   openUrl = (url) => {
@@ -87,7 +87,7 @@ export default class PackageView extends React.Component {
   }
 
   render() {
-    let p = this.state.packageInfo || (this.component.content.package_info || this.component.content);
+    let packageInfo = this.state.packageInfo || (this.component.content.package_info || this.component.content);
     let component = this.component;
     var showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
     var showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
@@ -98,12 +98,17 @@ export default class PackageView extends React.Component {
     }
 
     var updateAvailable = false, installedVersion;
-    var localInstallPossible = BridgeManager.get().localComponentInstallationAvailable();
+    var isDesktop = BridgeManager.get().localComponentInstallationAvailable();
     var componentPackageInfo = component && component.content.package_info;
 
-    if(localInstallPossible && componentPackageInfo && componentPackageInfo.version) {
+    let installError = component && BridgeManager.get().getItemAppDataValue(component, "installError");
+
+    if(isDesktop && componentPackageInfo && componentPackageInfo.version) {
+      var latestVersion = packageInfo.version;
+      let latestPackageInfo = BridgeManager.get().latestPackageInfoForComponent(component);
+      if(latestPackageInfo) { latestVersion = latestPackageInfo.version; }
       installedVersion = componentPackageInfo.version;
-      updateAvailable = compareVersions(p.version, installedVersion) == 1;
+      updateAvailable = compareVersions(latestVersion, installedVersion) == 1;
     }
 
     // Legacy server extensions without name
@@ -117,8 +122,8 @@ export default class PackageView extends React.Component {
     return [
         <div className="item-content">
           <div className="item-column stretch">
-            {p.thumbnail_url && !this.props.hideMeta &&
-              <img src={p.thumbnail_url} />
+            {packageInfo.thumbnail_url && !this.props.hideMeta &&
+              <img src={packageInfo.thumbnail_url} />
             }
 
             <input
@@ -126,27 +131,33 @@ export default class PackageView extends React.Component {
               type="text"
               className="disguised name-input"
               disabled={!this.state.rename}
-              value={this.state.renameValue || p.name}
+              value={this.state.renameValue || packageInfo.name}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
             />
 
-            {component && !componentPackageInfo &&
+            {component && installError &&
               <div className="notification warning package-notification">
-                <div className="text">Unable to find corresponding package information. Please uninstall this extension, then reinstall to enable local installation and updates.</div>
+                <div className="text">
+                  Error installing locally: {installError.tag} {packageInfo.download_url}
+                </div>
+              </div>
+            }
+
+            {component && !componentPackageInfo &&
+              <div className="notification default package-notification" onClick={() => {this.setState({componentWarningExpanded: !this.state.componentWarningExpanded})}}>
+                <div className="text">
+                  Unable to find corresponding package information.
+                  {this.state.componentWarningExpanded
+                    ? <span> Please uninstall this extension, then reinstall to enable local installation and updates.</span>
+                    : null
+                  }
+                </div>
               </div>
             }
 
             {!this.props.hideMeta &&
-              <p>{p.description}</p>
-            }
-
-            {localInstallPossible &&
-              <p>Latest Version: {p.version}</p>
-
-              [component &&
-                <p>Installed Version: {installedVersion}</p>
-              ]
+              <p>{packageInfo.description}</p>
             }
           </div>
         </div>,
@@ -172,7 +183,7 @@ export default class PackageView extends React.Component {
               </div>
             }
 
-            {localInstallPossible && updateAvailable &&
+            {isDesktop && updateAvailable &&
               <div className="button info" onClick={this.updateComponent}>
                 Update
               </div>
@@ -190,15 +201,24 @@ export default class PackageView extends React.Component {
               </div>
             }
 
-            {p.marketing_url &&
-              <div className="button default" onClick={() => {this.openUrl(p.marketing_url)}}>
+            {packageInfo.marketing_url &&
+              <div className="button default" onClick={() => {this.openUrl(packageInfo.marketing_url)}}>
                 Info
               </div>
             }
           </div>
 
           {this.state.showOptions &&
-            <div className="item-advanced-options">
+
+            <div className="notification default item-advanced-options">
+              {isDesktop &&
+                <div>
+                  {component &&
+                    <p className="panel-row">Installed Version: {installedVersion}</p>
+                  }
+                  <p className="panel-row">Latest Version: {latestVersion}</p>
+                </div>
+              }
               <label>
                 <input checked={!component.content.autoupdateDisabled} onChange={() => {this.toggleComponentOption('autoupdateDisabled')}} type="checkbox" />
                 Autoupdate local installation
