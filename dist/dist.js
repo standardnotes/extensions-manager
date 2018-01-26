@@ -125,25 +125,35 @@ var BridgeManager = function () {
 
     this.updateObservers = [];
     this.items = [];
+    this.packages = [];
+    this.size = null;
   }
 
   _createClass(BridgeManager, [{
     key: "initiateBridge",
     value: function initiateBridge(onReady) {
-      // var permissions = [
-      //   {
-      //     name: "stream-items",
-      //     content_types: ["SN|Component", "SN|Theme", "SF|Extension", "Extension"]
-      //   }
-      // ]
-
       this.componentManager = new _snComponentsApi2.default([], function () {
         onReady && onReady();
-        // on ready
       });
 
       this.componentManager.acceptsThemes = false;
-      // this.componentManager.setSize("container", 800, 500);
+    }
+  }, {
+    key: "getItemAppDataValue",
+    value: function getItemAppDataValue(item, key) {
+      return this.componentManager.getItemAppDataValue(item, key);
+    }
+  }, {
+    key: "registerPackages",
+    value: function registerPackages(packages) {
+      this.packages = packages;
+    }
+  }, {
+    key: "latestPackageInfoForComponent",
+    value: function latestPackageInfoForComponent(component) {
+      return this.packages.find(function (p) {
+        return p.identifier == component.content.package_info.identifier;
+      });
     }
   }, {
     key: "getSelfComponentUUID",
@@ -162,7 +172,6 @@ var BridgeManager = function () {
 
       this._didBeginStreaming = true;
       this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], function (items) {
-        // console.log("Prolink received items", items);
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
@@ -255,9 +264,14 @@ var BridgeManager = function () {
       }
 
       if (this.installedRepos.length > 0) {
-        this.componentManager.setSize("container", 800, 700);
+        if (this.size != "tall") {
+          this.size = "tall";
+          this.componentManager.setSize("container", 800, 700);
+        }
       } else {
-        this.componentManager.setSize("container", 800, 500);
+        if (this.size != "short") {
+          this.componentManager.setSize("container", 800, 500);
+        }
       }
     }
   }, {
@@ -312,6 +326,9 @@ var BridgeManager = function () {
     value: function itemForPackage(packageInfo) {
       var result = this.items.find(function (item) {
         if (!item.content.package_info) {
+          if (!item.content.url) {
+            return false;
+          }
           // Legacy component without package_info, search by url or name
           // We also check if the item content url contains the substring that is packageInfo, since
           // newer URL formats remove extraneous query params from the end
@@ -325,7 +342,6 @@ var BridgeManager = function () {
     key: "downloadPackageDetails",
     value: function downloadPackageDetails(url, callback) {
       _HttpManager2.default.get().getAbsolute(url, {}, function (response) {
-        console.log("Download package details:", response);
         callback(response);
       }, function (error) {
         console.log("Error downloading package details", error);
@@ -338,7 +354,6 @@ var BridgeManager = function () {
       var _this2 = this;
 
       _HttpManager2.default.get().getAbsolute(url, {}, function (response) {
-        console.log("Install from url response:", response);
         _this2.installPackage(response, function (component) {
           callback(component);
         });
@@ -351,18 +366,9 @@ var BridgeManager = function () {
   }, {
     key: "installPackage",
     value: function installPackage(aPackage, callback) {
-      var _this3 = this;
-
-      console.log("Installing", aPackage);
-      this.componentManager.createItem(this.createComponentDataForPackage(aPackage), function (component) {
-        if (_this3.localComponentInstallationAvailable()) {
-          _this3.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {
-            console.log("Prolink Installed Local component", installedComponent);
-            callback && callback(component);
-          });
-        } else {
-          callback && callback(component);
-        }
+      var data = this.createComponentDataForPackage(aPackage);
+      this.componentManager.createItem(data, function (component) {
+        callback && callback(component);
       });
     }
   }, {
@@ -398,41 +404,29 @@ var BridgeManager = function () {
   }, {
     key: "uninstallComponent",
     value: function uninstallComponent(component) {
-      if (component.content.active && component.uuid !== this.getSelfComponentUUID()) {
+      if (component.content.active && component.uuid !== this.getSelfComponentUUID() && component.content.area !== "modal") {
+        // modals can be marked 'active' even if they are invisible, in the case the user closes the window without dismissing it
         this.toggleOpenEvent(component);
       }
       this.componentManager.deleteItem(component);
     }
   }, {
-    key: "installPackageOffline",
-    value: function installPackageOffline(aPackage) {
-      var _this4 = this;
+    key: "updateComponent",
+    value: function updateComponent(component) {
+      var _this3 = this;
 
-      console.log("Installing offline", aPackage);
+      var latestPackageInfo = this.latestPackageInfoForComponent(component);;
 
-      var run = function run(component) {
-        _this4.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {
-          console.log("Prolink Installed Local component", installedComponent);
-        });
-      };
+      component.content.package_info.download_url = latestPackageInfo.download_url;
 
-      var existingComponent = this.itemForPackage(aPackage, true);
-      if (existingComponent) {
-        existingComponent.content.package_info = aPackage;
-        run(existingComponent);
-      } else {
-        var data = this.createComponentDataForPackage(aPackage);
-        this.componentManager.createItem(data, function (item) {
-          console.log("installPackageOffline createItem response", item);
-          run(item);
-        });
-      }
+      this.componentManager.saveItems([component], function () {
+        _this3.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {});
+      });
     }
   }, {
     key: "uninstallPackageOffline",
     value: function uninstallPackageOffline(aPackage) {
       var item = this.itemForPackage(aPackage, true);
-      console.log("Uninstalling offline", item);
       this.componentManager.deleteItem(item);
     }
   }, {
@@ -890,7 +884,7 @@ var PackageView = function (_React$Component) {
     };
 
     _this.updateComponent = function () {
-      _BridgeManager2.default.get().installPackageOffline(_this.packageInfo);
+      _BridgeManager2.default.get().updateComponent(_this.component);
     };
 
     _this.openUrl = function (url) {
@@ -948,7 +942,7 @@ var PackageView = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var p = this.state.packageInfo || this.component.content.package_info || this.component.content;
+      var packageInfo = this.state.packageInfo || this.component.content.package_info || this.component.content;
       var component = this.component;
       var showOpenOption = component && ["rooms", "modal"].includes(component.content.area);
       var showActivateOption = component && ["SN|Theme", "SN|Component"].includes(component.content_type) && !showOpenOption && !["editor-editor"].includes(component.content.area);
@@ -960,12 +954,19 @@ var PackageView = function (_React$Component) {
 
       var updateAvailable = false,
           installedVersion;
-      var localInstallPossible = _BridgeManager2.default.get().localComponentInstallationAvailable();
+      var isDesktop = _BridgeManager2.default.get().localComponentInstallationAvailable();
       var componentPackageInfo = component && component.content.package_info;
 
-      if (localInstallPossible && componentPackageInfo && componentPackageInfo.version) {
+      var installError = component && _BridgeManager2.default.get().getItemAppDataValue(component, "installError");
+
+      if (isDesktop && componentPackageInfo && componentPackageInfo.version) {
+        var latestVersion = packageInfo.version;
+        var latestPackageInfo = _BridgeManager2.default.get().latestPackageInfoForComponent(component);
+        if (latestPackageInfo) {
+          latestVersion = latestPackageInfo.version;
+        }
         installedVersion = componentPackageInfo.version;
-        updateAvailable = compareVersions(p.version, installedVersion) == 1;
+        updateAvailable = compareVersions(latestVersion, installedVersion) == 1;
       }
 
       // Legacy server extensions without name
@@ -982,7 +983,7 @@ var PackageView = function (_React$Component) {
         _react2.default.createElement(
           "div",
           { className: "item-column stretch" },
-          p.thumbnail_url && !this.props.hideMeta && _react2.default.createElement("img", { src: p.thumbnail_url }),
+          packageInfo.thumbnail_url && !this.props.hideMeta && _react2.default.createElement("img", { src: packageInfo.thumbnail_url }),
           _react2.default.createElement("input", {
             ref: function ref(input) {
               _this2.nameInput = input;
@@ -990,35 +991,43 @@ var PackageView = function (_React$Component) {
             type: "text",
             className: "disguised name-input",
             disabled: !this.state.rename,
-            value: this.state.renameValue || p.name,
+            value: this.state.renameValue || packageInfo.name,
             onKeyPress: this.handleKeyPress,
             onChange: this.handleChange
           }),
-          component && !componentPackageInfo && _react2.default.createElement(
+          component && installError && _react2.default.createElement(
             "div",
             { className: "notification warning package-notification" },
             _react2.default.createElement(
               "div",
               { className: "text" },
-              "Unable to find corresponding package information. Please uninstall this extension, then reinstall to enable local installation and updates."
+              "Error installing locally: ",
+              installError.tag,
+              " ",
+              packageInfo.download_url
+            )
+          ),
+          component && !componentPackageInfo && _react2.default.createElement(
+            "div",
+            { className: "notification default package-notification", onClick: function onClick() {
+                _this2.setState({ componentWarningExpanded: !_this2.state.componentWarningExpanded });
+              } },
+            _react2.default.createElement(
+              "div",
+              { className: "text" },
+              "Unable to find corresponding package information.",
+              this.state.componentWarningExpanded ? _react2.default.createElement(
+                "span",
+                null,
+                " Please uninstall this extension, then reinstall to enable local installation and updates."
+              ) : null
             )
           ),
           !this.props.hideMeta && _react2.default.createElement(
             "p",
             null,
-            p.description
-          ),
-          localInstallPossible && _react2.default.createElement(
-            "p",
-            null,
-            "Latest Version: ",
-            p.version
-          )[component && _react2.default.createElement(
-            "p",
-            null,
-            "Installed Version: ",
-            installedVersion
-          )]
+            packageInfo.description
+          )
         )
       ), _react2.default.createElement(
         "div",
@@ -1041,7 +1050,7 @@ var PackageView = function (_React$Component) {
             { className: "button " + (component.content.active ? "warning" : "success"), onClick: this.openComponent },
             component.content.active ? "Deactivate" : "Activate"
           ),
-          localInstallPossible && updateAvailable && _react2.default.createElement(
+          isDesktop && updateAvailable && _react2.default.createElement(
             "div",
             { className: "button info", onClick: this.updateComponent },
             "Update"
@@ -1056,17 +1065,33 @@ var PackageView = function (_React$Component) {
             { className: "button default", onClick: this.toggleOptions },
             "\u2022\u2022\u2022"
           ),
-          p.marketing_url && _react2.default.createElement(
+          packageInfo.marketing_url && _react2.default.createElement(
             "div",
             { className: "button default", onClick: function onClick() {
-                _this2.openUrl(p.marketing_url);
+                _this2.openUrl(packageInfo.marketing_url);
               } },
             "Info"
           )
         ),
         this.state.showOptions && _react2.default.createElement(
           "div",
-          { className: "item-advanced-options" },
+          { className: "notification default item-advanced-options" },
+          isDesktop && _react2.default.createElement(
+            "div",
+            null,
+            component && _react2.default.createElement(
+              "p",
+              { className: "panel-row" },
+              "Installed Version: ",
+              installedVersion
+            ),
+            _react2.default.createElement(
+              "p",
+              { className: "panel-row" },
+              "Latest Version: ",
+              latestVersion
+            )
+          ),
           _react2.default.createElement(
             "label",
             null,
@@ -1156,6 +1181,9 @@ var ManageInstalled = function (_React$Component) {
     _this.renameExt = function (ext) {};
 
     _this.category = function (title, extensions) {
+      extensions = extensions.sort(function (a, b) {
+        return a.content.name > b.content.name;
+      });
       return _react2.default.createElement(
         "div",
         { className: "panel-section" },
@@ -2182,6 +2210,7 @@ var RepoView = function (_React$Component) {
     _this.repoController = new _RepoController2.default({ repo: props.repo });
     _this.repoController.getPackages(function (packages, error) {
       if (!error) {
+        _BridgeManager2.default.get().registerPackages(packages);
         _this.setState({ packages: packages });
         if (_this.receivedBridgeItems && _this.needsUpdateComponents) {
           _this.updateComponentsWithNewPackageInfo();
@@ -2223,7 +2252,11 @@ var RepoView = function (_React$Component) {
               needsSave = true;
             }
 
-            if (!installed.content.package_info || installed.content.package_info !== packageInfo) {
+            /*
+            As part of the below condition, we used to also have if(JSON.stringify(installed.content.package_info) !== JSON.stringify(packageInfo))
+            to copy over package info. However, if the repo updates a version, then the installed component's version would also update without
+            */
+            if (!installed.content.package_info) {
               installed.content.package_info = packageInfo;
               needsSave = true;
             }
@@ -2250,6 +2283,8 @@ var RepoView = function (_React$Component) {
 
       if (needingSave.length > 0) {
         _BridgeManager2.default.get().saveItems(needingSave);
+      } else {
+        _BridgeManager2.default.get().notifyObserversOfUpdate();
       }
     }
   }, {
@@ -2496,19 +2531,21 @@ var ComponentManager = function () {
   }, {
     key: "streamContextItem",
     value: function streamContextItem(callback) {
-      var _this = this;
-
       this.postMessage("stream-context-item", null, function (data) {
         var item = data.item;
         /*
           When an item is saved via saveItem, its updated_at value is set client side to the current date.
           If we make a change locally, then for whatever reason receive an item via streamItems/streamContextItem,
           we want to ignore that change if it was made prior to the latest change we've made.
+           Update 1/22/18: However, if a user is restoring a note from version history, this change
+          will not pass through this filter and will thus be ignored. Because the client now handles
+          this case with isMetadataUpdate, we no longer need the below.
         */
-        if (_this.streamedContextItem && _this.streamedContextItem.uuid == item.uuid && _this.streamedContextItem.updated_at > item.updated_at) {
-          return;
-        }
-        _this.streamedContextItem = item;
+        // if(this.streamedContextItem && this.streamedContextItem.uuid == item.uuid
+        //   && this.streamedContextItem.updated_at > item.updated_at) {
+        //   return;
+        // }
+        // this.streamedContextItem = item;
         callback(item);
       });
     }
@@ -2571,7 +2608,7 @@ var ComponentManager = function () {
   }, {
     key: "saveItems",
     value: function saveItems(items, callback) {
-      var _this2 = this;
+      var _this = this;
 
       items = items.map(function (item) {
         item.updated_at = new Date();
@@ -2579,19 +2616,19 @@ var ComponentManager = function () {
       }.bind(this));
 
       var saveBlock = function saveBlock() {
-        _this2.postMessage("save-items", { items: items }, function (data) {
+        _this.postMessage("save-items", { items: items }, function (data) {
           callback && callback();
         });
       };
 
       /*
-          Coallesed saving prevents saves from being made after every keystroke, and instead
-          waits coallesedSavingDelay before performing action. For example, if a user types a keystroke, and the clienet calls saveItem,
-          a 250ms delay will begin. If they type another keystroke within 250ms, the previously pending
-          save will be cancelled, and another 250ms delay occurs. If ater 250ms the pending delay is not cleared by a future call,
-          the save will finally trigger.
-           Note: it's important to modify saving items updated_at immediately and not after delay. If you modify after delay,
-          a delayed sync could just be wrapping up, and will send back old data and replace what the user has typed.
+        Coallesed saving prevents saves from being made after every keystroke, and instead
+        waits coallesedSavingDelay before performing action. For example, if a user types a keystroke, and the clienet calls saveItem,
+        a 250ms delay will begin. If they type another keystroke within 250ms, the previously pending
+        save will be cancelled, and another 250ms delay occurs. If ater 250ms the pending delay is not cleared by a future call,
+        the save will finally trigger.
+         Note: it's important to modify saving items updated_at immediately and not after delay. If you modify after delay,
+        a delayed sync could just be wrapping up, and will send back old data and replace what the user has typed.
       */
       if (this.coallesedSaving == true) {
         if (this.pendingSave) {
@@ -2610,6 +2647,17 @@ var ComponentManager = function () {
       copy.children = null;
       copy.parent = null;
       return copy;
+    }
+  }, {
+    key: "getItemAppDataValue",
+    value: function getItemAppDataValue(item, key) {
+      var AppDomain = "org.standardnotes.sn";
+      var data = item.content.appData[AppDomain];
+      if (data) {
+        return data[key];
+      } else {
+        return null;
+      }
     }
 
     /* Themes */
@@ -3066,6 +3114,7 @@ var Advanced = function (_React$Component) {
             className: "",
             placeholder: "Enter Extension Link",
             type: "url",
+            autoFocus: true,
             value: this.state.url,
             onKeyPress: this.handleKeyPress,
             onChange: this.handleInputChange
