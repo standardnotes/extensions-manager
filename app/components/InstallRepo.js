@@ -43,7 +43,7 @@ export default class InstallRepo extends React.Component {
         </div>
         <div className="panel-row centered">
           <h1 className="title center-text">
-            <strong>Standard Notes Pro</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.
+            <strong>Standard Notes Extended</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.
           </h1>
         </div>
         <div className="panel-row" />

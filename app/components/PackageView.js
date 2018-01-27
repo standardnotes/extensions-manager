@@ -119,6 +119,8 @@ export default class PackageView extends React.Component {
       }
     }
 
+    let displayName = component ? component.content.name : packageInfo.name;
+
     return [
         <div className="item-content">
           <div className="item-column stretch">
@@ -131,7 +133,7 @@ export default class PackageView extends React.Component {
               type="text"
               className="disguised name-input"
               disabled={!this.state.rename}
-              value={this.state.renameValue || packageInfo.name}
+              value={this.state.renameValue || displayName}
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
             />

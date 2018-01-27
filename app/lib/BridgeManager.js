@@ -220,12 +220,6 @@ export default class BridgeManager {
   }
 
   uninstallComponent(component) {
-    if(component.content.active
-      && component.uuid !== this.getSelfComponentUUID()
-      && component.content.area !== "modal") {
-        // modals can be marked 'active' even if they are invisible, in the case the user closes the window without dismissing it
-        this.toggleOpenEvent(component);
-    }
     this.componentManager.deleteItem(component);
   }
 

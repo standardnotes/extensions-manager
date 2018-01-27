@@ -83,7 +83,7 @@ export default class RepoView extends React.Component {
   }
 
   deleteRepo = () => {
-    if(confirm("Are you sure you want to delete this ProLink repository?")) {
+    if(confirm("Are you sure you want to delete this repository?")) {
       BridgeManager.get().uninstallRepo(this.props.repo);
     }
   }

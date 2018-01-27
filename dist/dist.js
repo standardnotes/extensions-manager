@@ -404,10 +404,6 @@ var BridgeManager = function () {
   }, {
     key: "uninstallComponent",
     value: function uninstallComponent(component) {
-      if (component.content.active && component.uuid !== this.getSelfComponentUUID() && component.content.area !== "modal") {
-        // modals can be marked 'active' even if they are invisible, in the case the user closes the window without dismissing it
-        this.toggleOpenEvent(component);
-      }
       this.componentManager.deleteItem(component);
     }
   }, {
@@ -977,6 +973,8 @@ var PackageView = function (_React$Component) {
         }
       }
 
+      var displayName = component ? component.content.name : packageInfo.name;
+
       return [_react2.default.createElement(
         "div",
         { className: "item-content" },
@@ -991,7 +989,7 @@ var PackageView = function (_React$Component) {
             type: "text",
             className: "disguised name-input",
             disabled: !this.state.rename,
-            value: this.state.renameValue || packageInfo.name,
+            value: this.state.renameValue || displayName,
             onKeyPress: this.handleKeyPress,
             onChange: this.handleChange
           }),
@@ -2198,7 +2196,7 @@ var RepoView = function (_React$Component) {
     };
 
     _this.deleteRepo = function () {
-      if (confirm("Are you sure you want to delete this ProLink repository?")) {
+      if (confirm("Are you sure you want to delete this repository?")) {
         _BridgeManager2.default.get().uninstallRepo(_this.props.repo);
       }
     };
@@ -2949,7 +2947,7 @@ var InstallRepo = function (_React$Component) {
             _react2.default.createElement(
               "strong",
               null,
-              "Standard Notes Pro"
+              "Standard Notes Extended"
             ),
             " gives you access to powerful editors, extensions, tools, themes, and cloud backup options."
           )
