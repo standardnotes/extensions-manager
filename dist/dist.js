@@ -2209,7 +2209,7 @@ var RepoView = function (_React$Component) {
     _this.repoController.getPackages(function (packages, error) {
       if (!error) {
         _BridgeManager2.default.get().registerPackages(packages);
-        _this.setState({ packages: packages });
+        _this.setState({ packages: packages || [] });
         if (_this.receivedBridgeItems && _this.needsUpdateComponents) {
           _this.updateComponentsWithNewPackageInfo();
         }
@@ -2904,6 +2904,16 @@ var InstallRepo = function (_React$Component) {
   _createClass(InstallRepo, [{
     key: "installProLink",
     value: function installProLink(url) {
+      var decoded;
+      try {
+        // base64 decode
+        decoded = atob(url);
+      } catch (e) {}
+
+      if (decoded) {
+        url = decoded;
+      }
+
       _BridgeManager2.default.get().installRepoUrl(url);
       this.setState({ url: "" });
     }

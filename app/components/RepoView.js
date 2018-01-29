@@ -16,7 +16,7 @@ export default class RepoView extends React.Component {
     this.repoController.getPackages((packages, error) => {
       if(!error) {
         BridgeManager.get().registerPackages(packages);
-        this.setState({packages: packages});
+        this.setState({packages: packages || []});
         if(this.receivedBridgeItems && this.needsUpdateComponents) {
           this.updateComponentsWithNewPackageInfo();
         }

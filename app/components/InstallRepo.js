@@ -11,6 +11,16 @@ export default class InstallRepo extends React.Component {
   }
 
   installProLink(url) {
+    var decoded;
+    try {
+      // base64 decode
+      decoded = atob(url);
+    } catch (e) {}
+
+    if(decoded) {
+      url = decoded;
+    }
+
     BridgeManager.get().installRepoUrl(url);
     this.setState({url: ""});
   }
