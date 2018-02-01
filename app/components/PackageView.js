@@ -103,6 +103,11 @@ export default class PackageView extends React.Component {
 
     let installError = component && BridgeManager.get().getItemAppDataValue(component, "installError");
 
+    // Whether this package support local installation
+    let localInstallable = packageInfo.download_url;
+
+    let isComponentActive = component && component.content.active;
+
     if(isDesktop && componentPackageInfo && componentPackageInfo.version) {
       var latestVersion = packageInfo.version;
       let latestPackageInfo = BridgeManager.get().latestPackageInfoForComponent(component);
@@ -131,7 +136,7 @@ export default class PackageView extends React.Component {
             <input
               ref={(input) => { this.nameInput = input; }}
               type="text"
-              className="disguised name-input"
+              className="panel-row disguised name-input"
               disabled={!this.state.rename}
               value={this.state.renameValue || displayName}
               onKeyPress={this.handleKeyPress}
@@ -159,7 +164,9 @@ export default class PackageView extends React.Component {
             }
 
             {!this.props.hideMeta &&
-              <p>{packageInfo.description}</p>
+              <div className="panel-row">
+                <p>{packageInfo.description}</p>
+              </div>
             }
           </div>
         </div>,
@@ -180,8 +187,8 @@ export default class PackageView extends React.Component {
 
             {showActivateOption &&
 
-              <div className={"button " + (component.content.active ? "warning" : "success")} onClick={this.openComponent}>
-                {component.content.active ? "Deactivate" : "Activate"}
+              <div className={"button " + (isComponentActive ? "warning" : "success")} onClick={this.openComponent}>
+                {isComponentActive ? "Deactivate" : "Activate"}
               </div>
             }
 
@@ -210,7 +217,7 @@ export default class PackageView extends React.Component {
             }
           </div>
 
-          {this.state.showOptions &&
+          {this.state.showOptions && component &&
 
             <div className="notification default item-advanced-options">
               {isDesktop &&
@@ -221,15 +228,25 @@ export default class PackageView extends React.Component {
                   <p className="panel-row">Latest Version: {latestVersion}</p>
                 </div>
               }
-              <label>
-                <input checked={!component.content.autoupdateDisabled} onChange={() => {this.toggleComponentOption('autoupdateDisabled')}} type="checkbox" />
-                Autoupdate local installation
-              </label>
 
-              <label>
-                <input checked={!component.content.offlineOnly} onChange={() => {this.toggleComponentOption('offlineOnly')}} type="checkbox" />
-                Use hosted when local is unavailable
-              </label>
+              {localInstallable &&
+                <div>
+                  <label>
+                    <input disabled={!localInstallable} checked={localInstallable && !component.content.autoupdateDisabled} onChange={() => {this.toggleComponentOption('autoupdateDisabled')}} type="checkbox" />
+                    Autoupdate local installation
+                  </label>
+
+                  <label>
+                    <input disabled={!localInstallable} checked={localInstallable && !component.content.offlineOnly} onChange={() => {this.toggleComponentOption('offlineOnly')}} type="checkbox" />
+                    Use hosted when local is unavailable
+                  </label>
+                </div>
+              }
+
+              {!localInstallable &&
+                <p className="panel-row">This extension does not support local installation.</p>
+              }
+
 
               <a className="info" onClick={this.toggleRename}>{this.state.rename ? 'Press enter to submit' : 'Rename'}</a>
             </div>

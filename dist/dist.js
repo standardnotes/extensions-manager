@@ -955,6 +955,11 @@ var PackageView = function (_React$Component) {
 
       var installError = component && _BridgeManager2.default.get().getItemAppDataValue(component, "installError");
 
+      // Whether this package support local installation
+      var localInstallable = packageInfo.download_url;
+
+      var isComponentActive = component && component.content.active;
+
       if (isDesktop && componentPackageInfo && componentPackageInfo.version) {
         var latestVersion = packageInfo.version;
         var latestPackageInfo = _BridgeManager2.default.get().latestPackageInfoForComponent(component);
@@ -987,7 +992,7 @@ var PackageView = function (_React$Component) {
               _this2.nameInput = input;
             },
             type: "text",
-            className: "disguised name-input",
+            className: "panel-row disguised name-input",
             disabled: !this.state.rename,
             value: this.state.renameValue || displayName,
             onKeyPress: this.handleKeyPress,
@@ -1022,9 +1027,13 @@ var PackageView = function (_React$Component) {
             )
           ),
           !this.props.hideMeta && _react2.default.createElement(
-            "p",
-            null,
-            packageInfo.description
+            "div",
+            { className: "panel-row" },
+            _react2.default.createElement(
+              "p",
+              null,
+              packageInfo.description
+            )
           )
         )
       ), _react2.default.createElement(
@@ -1045,8 +1054,8 @@ var PackageView = function (_React$Component) {
           ),
           showActivateOption && _react2.default.createElement(
             "div",
-            { className: "button " + (component.content.active ? "warning" : "success"), onClick: this.openComponent },
-            component.content.active ? "Deactivate" : "Activate"
+            { className: "button " + (isComponentActive ? "warning" : "success"), onClick: this.openComponent },
+            isComponentActive ? "Deactivate" : "Activate"
           ),
           isDesktop && updateAvailable && _react2.default.createElement(
             "div",
@@ -1071,7 +1080,7 @@ var PackageView = function (_React$Component) {
             "Info"
           )
         ),
-        this.state.showOptions && _react2.default.createElement(
+        this.state.showOptions && component && _react2.default.createElement(
           "div",
           { className: "notification default item-advanced-options" },
           isDesktop && _react2.default.createElement(
@@ -1090,21 +1099,30 @@ var PackageView = function (_React$Component) {
               latestVersion
             )
           ),
-          _react2.default.createElement(
-            "label",
+          localInstallable && _react2.default.createElement(
+            "div",
             null,
-            _react2.default.createElement("input", { checked: !component.content.autoupdateDisabled, onChange: function onChange() {
-                _this2.toggleComponentOption('autoupdateDisabled');
-              }, type: "checkbox" }),
-            "Autoupdate local installation"
+            _react2.default.createElement(
+              "label",
+              null,
+              _react2.default.createElement("input", { disabled: !localInstallable, checked: localInstallable && !component.content.autoupdateDisabled, onChange: function onChange() {
+                  _this2.toggleComponentOption('autoupdateDisabled');
+                }, type: "checkbox" }),
+              "Autoupdate local installation"
+            ),
+            _react2.default.createElement(
+              "label",
+              null,
+              _react2.default.createElement("input", { disabled: !localInstallable, checked: localInstallable && !component.content.offlineOnly, onChange: function onChange() {
+                  _this2.toggleComponentOption('offlineOnly');
+                }, type: "checkbox" }),
+              "Use hosted when local is unavailable"
+            )
           ),
-          _react2.default.createElement(
-            "label",
-            null,
-            _react2.default.createElement("input", { checked: !component.content.offlineOnly, onChange: function onChange() {
-                _this2.toggleComponentOption('offlineOnly');
-              }, type: "checkbox" }),
-            "Use hosted when local is unavailable"
+          !localInstallable && _react2.default.createElement(
+            "p",
+            { className: "panel-row" },
+            "This extension does not support local installation."
           ),
           _react2.default.createElement(
             "a",
