@@ -955,7 +955,7 @@ var PackageView = function (_React$Component) {
 
       // Server based and action extensions do not neccessarily need to have package info, as they are fully hosted.
       // We use this flag to hide the "Unable to find package info" error
-      var shouldHavePackageInfo = component && !["SF|Extension", "Extension"].includes(component.content.content_type);
+      var shouldHavePackageInfo = component && !["SF|Extension", "Extension"].includes(component.content_type);
 
       var installError = component && _BridgeManager2.default.get().getItemAppDataValue(component, "installError");
 
