@@ -103,7 +103,7 @@ export default class PackageView extends React.Component {
 
     // Server based and action extensions do not neccessarily need to have package info, as they are fully hosted.
     // We use this flag to hide the "Unable to find package info" error
-    let shouldHavePackageInfo = component && !["SF|Extension", "Extension"].includes(component.content.content_type);
+    let shouldHavePackageInfo = component && !["SF|Extension", "Extension"].includes(component.content_type);
 
     let installError = component && BridgeManager.get().getItemAppDataValue(component, "installError");
 
