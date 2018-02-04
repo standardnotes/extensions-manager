@@ -26,6 +26,12 @@ export default class Advanced extends React.Component {
   }
 
   downloadPackage(url) {
+    try {
+      var decoded = window.atob(url);
+      if(decoded) {
+        url = decoded;
+      }
+    } catch (e) {}
     BridgeManager.get().downloadPackageDetails(url, (response) => {
       if(response.content_type == "SN|Repo") {
         BridgeManager.get().installRepoUrl(url);
