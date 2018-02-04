@@ -953,6 +953,10 @@ var PackageView = function (_React$Component) {
       var isDesktop = _BridgeManager2.default.get().localComponentInstallationAvailable();
       var componentPackageInfo = component && component.content.package_info;
 
+      // Server based and action extensions do not neccessarily need to have package info, as they are fully hosted.
+      // We use this flag to hide the "Unable to find package info" error
+      var shouldHavePackageInfo = component && !["SF|Extension", "Extension"].includes(component.content.content_type);
+
       var installError = component && _BridgeManager2.default.get().getItemAppDataValue(component, "installError");
 
       // Whether this package support local installation
@@ -1010,7 +1014,7 @@ var PackageView = function (_React$Component) {
               packageInfo.download_url
             )
           ),
-          component && !componentPackageInfo && _react2.default.createElement(
+          component && !componentPackageInfo && shouldHavePackageInfo && _react2.default.createElement(
             "div",
             { className: "notification default package-notification", onClick: function onClick() {
                 _this2.setState({ componentWarningExpanded: !_this2.state.componentWarningExpanded });
@@ -1083,7 +1087,7 @@ var PackageView = function (_React$Component) {
         this.state.showOptions && component && _react2.default.createElement(
           "div",
           { className: "notification default item-advanced-options" },
-          isDesktop && _react2.default.createElement(
+          isDesktop && localInstallable && _react2.default.createElement(
             "div",
             null,
             component && _react2.default.createElement(
@@ -3095,6 +3099,12 @@ var Advanced = function (_React$Component) {
     value: function downloadPackage(url) {
       var _this2 = this;
 
+      try {
+        var decoded = window.atob(url);
+        if (decoded) {
+          url = decoded;
+        }
+      } catch (e) {}
       _BridgeManager2.default.get().downloadPackageDetails(url, function (response) {
         if (response.content_type == "SN|Repo") {
           _BridgeManager2.default.get().installRepoUrl(url);
