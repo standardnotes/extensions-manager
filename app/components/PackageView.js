@@ -101,6 +101,10 @@ export default class PackageView extends React.Component {
     var isDesktop = BridgeManager.get().localComponentInstallationAvailable();
     var componentPackageInfo = component && component.content.package_info;
 
+    // Server based and action extensions do not neccessarily need to have package info, as they are fully hosted.
+    // We use this flag to hide the "Unable to find package info" error
+    let shouldHavePackageInfo = component && !["SF|Extension", "Extension"].includes(component.content.content_type);
+
     let installError = component && BridgeManager.get().getItemAppDataValue(component, "installError");
 
     // Whether this package support local installation
@@ -151,7 +155,7 @@ export default class PackageView extends React.Component {
               </div>
             }
 
-            {component && !componentPackageInfo &&
+            {component && !componentPackageInfo && shouldHavePackageInfo &&
               <div className="notification default package-notification" onClick={() => {this.setState({componentWarningExpanded: !this.state.componentWarningExpanded})}}>
                 <div className="text">
                   Unable to find corresponding package information.
@@ -218,9 +222,8 @@ export default class PackageView extends React.Component {
           </div>
 
           {this.state.showOptions && component &&
-
             <div className="notification default item-advanced-options">
-              {isDesktop &&
+              {isDesktop && localInstallable &&
                 <div>
                   {component &&
                     <p className="panel-row">Installed Version: {installedVersion}</p>
