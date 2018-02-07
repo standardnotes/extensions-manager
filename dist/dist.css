@@ -344,7 +344,8 @@ input.disguised {
 .sn-component label input[type='checkbox'], .sn-component input[type='radio'] {
   width: auto;
   margin-right: 0.45rem;
-  /* Space after checkbox */ }
+  /* Space after checkbox */
+  vertical-align: middle; }
 
 .sn-component .horizontal-group > *, .sn-component .input-group > * {
   display: inline-block;
