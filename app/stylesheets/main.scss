@@ -32,7 +32,8 @@ html, body {
     font-weight: bold;
 
     &[type="text"][disabled] {
-       color: black;
+      color: black;
+      background-color: transparent;
     }
   }
 }
