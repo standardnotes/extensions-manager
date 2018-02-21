@@ -112,7 +112,7 @@ export default class PackageView extends React.Component {
 
     let isComponentActive = component && component.content.active;
 
-    if(isDesktop && componentPackageInfo && componentPackageInfo.version) {
+    if(isDesktop && componentPackageInfo && localInstallable && componentPackageInfo.version) {
       var latestVersion = packageInfo.version;
       let latestPackageInfo = BridgeManager.get().latestPackageInfoForComponent(component);
       if(latestPackageInfo) { latestVersion = latestPackageInfo.version; }

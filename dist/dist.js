@@ -964,7 +964,7 @@ var PackageView = function (_React$Component) {
 
       var isComponentActive = component && component.content.active;
 
-      if (isDesktop && componentPackageInfo && componentPackageInfo.version) {
+      if (isDesktop && componentPackageInfo && localInstallable && componentPackageInfo.version) {
         var latestVersion = packageInfo.version;
         var latestPackageInfo = _BridgeManager2.default.get().latestPackageInfoForComponent(component);
         if (latestPackageInfo) {
@@ -2443,6 +2443,7 @@ var ComponentManager = function () {
     this.loggingEnabled = false;
     this.acceptsThemes = true;
     this.onReadyCallback = onReady;
+    this.unhandledMessageHandler = null;
 
     this.coallesedSaving = true;
     this.coallesedSavingDelay = 250;
@@ -2478,6 +2479,11 @@ var ComponentManager = function () {
 
         if (originalMessage.callback) {
           originalMessage.callback(payload.data);
+        }
+      } else {
+        // Unhandled message
+        if (this.unhandledMessageHandler) {
+          this.unhandledMessageHandler(payload.data);
         }
       }
     }
