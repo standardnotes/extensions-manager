@@ -114,10 +114,14 @@ export default class PackageView extends React.Component {
 
     if(isDesktop && componentPackageInfo && localInstallable && componentPackageInfo.version) {
       var latestVersion = packageInfo.version;
-      let latestPackageInfo = BridgeManager.get().latestPackageInfoForComponent(component);
-      if(latestPackageInfo) { latestVersion = latestPackageInfo.version; }
-      installedVersion = componentPackageInfo.version;
-      updateAvailable = compareVersions(latestVersion, installedVersion) == 1;
+      try {
+        let latestPackageInfo = BridgeManager.get().latestPackageInfoForComponent(component);
+        if(latestPackageInfo) { latestVersion = latestPackageInfo.version; }
+        installedVersion = componentPackageInfo.version;
+        updateAvailable = compareVersions(latestVersion, installedVersion) == 1;
+      } catch (e) {
+        console.log("Error comparing versions for", packageInfo);
+      }
     }
 
     // Legacy server extensions without name

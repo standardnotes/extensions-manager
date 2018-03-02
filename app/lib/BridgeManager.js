@@ -31,7 +31,7 @@ export default class BridgeManager {
   }
 
   registerPackages(packages) {
-    this.packages = packages;
+    this.packages = packages || [];
   }
 
   latestPackageInfoForComponent(component) {

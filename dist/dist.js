@@ -146,7 +146,7 @@ var BridgeManager = function () {
   }, {
     key: "registerPackages",
     value: function registerPackages(packages) {
-      this.packages = packages;
+      this.packages = packages || [];
     }
   }, {
     key: "latestPackageInfoForComponent",
@@ -966,12 +966,16 @@ var PackageView = function (_React$Component) {
 
       if (isDesktop && componentPackageInfo && localInstallable && componentPackageInfo.version) {
         var latestVersion = packageInfo.version;
-        var latestPackageInfo = _BridgeManager2.default.get().latestPackageInfoForComponent(component);
-        if (latestPackageInfo) {
-          latestVersion = latestPackageInfo.version;
+        try {
+          var latestPackageInfo = _BridgeManager2.default.get().latestPackageInfoForComponent(component);
+          if (latestPackageInfo) {
+            latestVersion = latestPackageInfo.version;
+          }
+          installedVersion = componentPackageInfo.version;
+          updateAvailable = compareVersions(latestVersion, installedVersion) == 1;
+        } catch (e) {
+          console.log("Error comparing versions for", packageInfo);
         }
-        installedVersion = componentPackageInfo.version;
-        updateAvailable = compareVersions(latestVersion, installedVersion) == 1;
       }
 
       // Legacy server extensions without name
@@ -2443,7 +2447,6 @@ var ComponentManager = function () {
     this.loggingEnabled = false;
     this.acceptsThemes = true;
     this.onReadyCallback = onReady;
-    this.unhandledMessageHandler = null;
 
     this.coallesedSaving = true;
     this.coallesedSavingDelay = 250;
@@ -2479,11 +2482,6 @@ var ComponentManager = function () {
 
         if (originalMessage.callback) {
           originalMessage.callback(payload.data);
-        }
-      } else {
-        // Unhandled message
-        if (this.unhandledMessageHandler) {
-          this.unhandledMessageHandler(payload.data);
         }
       }
     }
