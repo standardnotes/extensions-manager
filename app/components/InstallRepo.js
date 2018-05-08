@@ -35,6 +35,10 @@ export default class InstallRepo extends React.Component {
     this.setState({url: event.target.value});
   }
 
+  submitUrl = () => {
+    this.installProLink(this.state.url);
+  }
+
   render() {
     return (
       <div id="install-repo" className="panel-section">
@@ -51,6 +55,17 @@ export default class InstallRepo extends React.Component {
             onChange={this.handleChange}
           />
         </div>
+
+        {this.state.url && this.state.url.length > 0 &&
+          <div id="submit-button" className="panel-row centered">
+            <a onClick={this.submitUrl} className="button success big">
+              <div className="label">
+                Submit Code
+              </div>
+            </a>
+          </div>
+        }
+
         <div className="panel-row centered">
           <h1 className="title center-text">
             <strong>Standard Notes Extended</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.

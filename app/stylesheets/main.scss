@@ -49,4 +49,10 @@ input.disguised {
   font-size: 1rem !important;
 }
 
+#install-repo {
+  #submit-button {
+    margin-top: -8px !important;
+  }
+}
+
 @import '~stylekit';
