@@ -35,6 +35,9 @@ input.disguised {
   margin: 0 !important;
   font-size: 1rem !important; }
 
+#install-repo #submit-button {
+  margin-top: -8px !important; }
+
 .sn-component {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;

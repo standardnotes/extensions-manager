@@ -2975,6 +2975,10 @@ var InstallRepo = function (_React$Component) {
       _this.setState({ url: event.target.value });
     };
 
+    _this.submitUrl = function () {
+      _this.installProLink(_this.state.url);
+    };
+
     _this.state = { url: "" };
     return _this;
   }
@@ -3025,6 +3029,19 @@ var InstallRepo = function (_React$Component) {
             onKeyPress: this.handleKeyPress,
             onChange: this.handleChange
           })
+        ),
+        this.state.url && this.state.url.length > 0 && _react2.default.createElement(
+          "div",
+          { id: "submit-button", className: "panel-row centered" },
+          _react2.default.createElement(
+            "a",
+            { onClick: this.submitUrl, className: "button success big" },
+            _react2.default.createElement(
+              "div",
+              { className: "label" },
+              "Submit Code"
+            )
+          )
         ),
         _react2.default.createElement(
           "div",
