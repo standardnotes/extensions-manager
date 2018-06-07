@@ -404,6 +404,11 @@ var BridgeManager = function () {
   }, {
     key: "uninstallComponent",
     value: function uninstallComponent(component) {
+      if (component.uuid == BridgeManager.get().getSelfComponentUUID()) {
+        if (!confirm("You are uninstalling the Extensions manager. After it has been uninstalled, please reload the application, and a new installation will be created.")) {
+          return;
+        }
+      }
       this.componentManager.deleteItem(component);
     }
   }, {
@@ -2439,6 +2444,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var ComponentManager = function () {
   function ComponentManager(permissions, onReady) {
+    var _this = this;
+
     _classCallCheck(this, ComponentManager);
 
     this.sentMessages = [];
@@ -2451,12 +2458,32 @@ var ComponentManager = function () {
     this.coallesedSaving = true;
     this.coallesedSavingDelay = 250;
 
-    window.addEventListener("message", function (event) {
-      if (this.loggingEnabled) {
-        console.log("Components API Message received:", event.data);
+    var messageHandler = function messageHandler(event, mobileSource) {
+      if (_this.loggingEnabled) {
+        console.log("Components API Message received:", event.data, "mobile?", mobileSource);
       }
-      this.handleMessage(event.data);
-    }.bind(this), false);
+
+      // The first message will be the most reliable one, so we won't change it after any subsequent events,
+      // in case you receive an event from another window.
+      if (!_this.origin) {
+        _this.origin = event.origin;
+      }
+      _this.mobileSource = mobileSource;
+      // If from mobile app, JSON needs to be used.
+      var data = mobileSource ? JSON.parse(event.data) : event.data;
+      _this.handleMessage(data);
+    };
+
+    // Mobile (React Native) uses `document`, web/desktop uses `window`.addEventListener
+    // for postMessage API to work properly.
+
+    document.addEventListener("message", function (event) {
+      messageHandler(event, true);
+    }, false);
+
+    window.addEventListener("message", function (event) {
+      messageHandler(event, false);
+    }, false);
   }
 
   _createClass(ComponentManager, [{
@@ -2576,11 +2603,16 @@ var ComponentManager = function () {
       sentMessage.callback = callback;
       this.sentMessages.push(sentMessage);
 
+      // Mobile (React Native) requires a string for the postMessage API.
+      if (this.mobileSource) {
+        message = JSON.stringify(message);
+      }
+
       if (this.loggingEnabled) {
         console.log("Posting message:", message);
       }
 
-      window.parent.postMessage(message, '*');
+      window.parent.postMessage(message, this.origin);
     }
   }, {
     key: "setSize",
@@ -2635,8 +2667,27 @@ var ComponentManager = function () {
     value: function createItem(item, callback) {
       this.postMessage("create-item", { item: this.jsonObjectForItem(item) }, function (data) {
         var item = data.item;
+
+        // A previous version of the SN app had an issue where the item in the reply to create-item
+        // would be nested inside "items" and not "item". So handle both cases here.
+        if (!item && data.items && data.items.length > 0) {
+          item = data.items[0];
+        }
+
         this.associateItem(item);
         callback && callback(item);
+      }.bind(this));
+    }
+  }, {
+    key: "createItems",
+    value: function createItems(items, callback) {
+      var _this2 = this;
+
+      var mapped = items.map(function (item) {
+        return _this2.jsonObjectForItem(item);
+      });
+      this.postMessage("create-items", { items: mapped }, function (data) {
+        callback && callback(data.items);
       }.bind(this));
     }
   }, {
@@ -2684,7 +2735,7 @@ var ComponentManager = function () {
   }, {
     key: "saveItems",
     value: function saveItems(items, callback) {
-      var _this = this;
+      var _this3 = this;
 
       items = items.map(function (item) {
         item.updated_at = new Date();
@@ -2692,7 +2743,7 @@ var ComponentManager = function () {
       }.bind(this));
 
       var saveBlock = function saveBlock() {
-        _this.postMessage("save-items", { items: items }, function (data) {
+        _this3.postMessage("save-items", { items: items }, function (data) {
           callback && callback();
         });
       };

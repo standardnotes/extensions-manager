@@ -220,6 +220,11 @@ export default class BridgeManager {
   }
 
   uninstallComponent(component) {
+    if(component.uuid == BridgeManager.get().getSelfComponentUUID()) {
+      if(!confirm("You are uninstalling the Extensions manager. After it has been uninstalled, please reload the application, and a new installation will be created.")) {
+        return;
+      }
+    }
     this.componentManager.deleteItem(component);
   }
 
