@@ -9,10 +9,10 @@ export default class RepoController {
   getPackages(callback) {
     HttpManager.get().getAbsolute(this.repo.url, {}, (response) => {
       this.response = response;
-      callback(response.packages);
+      callback(response);
     }, (error) => {
       console.log("Error loading repo", error);
-      callback(null, error || {});
+      callback(null);
     })
   }
 

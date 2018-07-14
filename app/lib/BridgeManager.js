@@ -12,9 +12,16 @@ export default class BridgeManager {
   }
 
   constructor(onReceieveItems) {
+    BridgeManager.EventSaving = "EventSaving";
+    BridgeManager.EventDoneSaving = "EventDoneSaving";
+    BridgeManager.EventDownloadingPackages = "EventDownloadingPackages";
+    BridgeManager.EventDoneDownloadingPackages = "EventDoneDownloadingPackages";
+    BridgeManager.EventUpdatedValidUntil = "EventUpdatedValidUntil";
+
     this.updateObservers = [];
     this.items = [];
     this.packages = [];
+    this.eventHandlers = [];
     this.size = null;
   }
 
@@ -28,6 +35,16 @@ export default class BridgeManager {
 
   getItemAppDataValue(item, key) {
     return this.componentManager.getItemAppDataValue(item, key);
+  }
+
+  addEventHandler(handler) {
+    this.eventHandlers.push(handler);
+  }
+
+  notifyEvent(event, data) {
+    for(var handler of this.eventHandlers) {
+      handler(event, data || {});
+    }
   }
 
   registerPackages(packages) {
@@ -193,7 +210,9 @@ export default class BridgeManager {
   }
 
   saveItems(items, callback) {
+    this.notifyEvent(BridgeManager.EventSaving);
     this.componentManager.saveItems(items, () => {
+      this.notifyEvent(BridgeManager.EventDoneSaving);
       callback && callback();
     })
   }

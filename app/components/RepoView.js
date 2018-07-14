@@ -13,15 +13,7 @@ export default class RepoView extends React.Component {
     this.needsUpdateComponents = true;
 
     this.repoController = new RepoController({repo: props.repo});
-    this.repoController.getPackages((packages, error) => {
-      if(!error) {
-        BridgeManager.get().registerPackages(packages);
-        this.setState({packages: packages || []});
-        if(this.receivedBridgeItems && this.needsUpdateComponents) {
-          this.updateComponentsWithNewPackageInfo();
-        }
-      }
-    })
+    this.refreshRepo();
 
     this.updateObserver = BridgeManager.get().addUpdateObserver(() => {
       this.receivedBridgeItems = true;
@@ -29,6 +21,23 @@ export default class RepoView extends React.Component {
         this.updateComponentsWithNewPackageInfo();
       }
       this.reload();
+    })
+  }
+
+  refreshRepo() {
+    BridgeManager.get().notifyEvent(BridgeManager.EventDownloadingPackages);
+    this.repoController.getPackages((response) => {
+      BridgeManager.get().notifyEvent(BridgeManager.EventDoneDownloadingPackages);
+      if(response) {
+        var packages = response.packages;
+        var valid_until = new Date(response.valid_until);
+        BridgeManager.get().notifyEvent(BridgeManager.EventUpdatedValidUntil, {valid_until});
+        BridgeManager.get().registerPackages(packages);
+        this.setState({packages: packages || []});
+        if(this.receivedBridgeItems) {
+          this.updateComponentsWithNewPackageInfo();
+        }
+      }
     })
   }
 
@@ -42,7 +51,7 @@ export default class RepoView extends React.Component {
         var needsSave = false;
         let validUntil = new Date(packageInfo.valid_until);
         // .getTime() must be used to compare dates
-        if(!installed.content.valid_until || (installed.content.valid_until.getTime() !== validUntil.getTime())) {
+        if(packageInfo.valid_until && (!installed.content.valid_until || (installed.content.valid_until.getTime() !== validUntil.getTime()))) {
           installed.content.valid_until = validUntil;
           needsSave = true;
         }

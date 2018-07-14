@@ -12,6 +12,8 @@ html, body {
   }
 }
 
+
+
 .package {
   label {
     font-size: 1rem !important;
@@ -56,3 +58,7 @@ input.disguised {
 }
 
 @import '~stylekit';
+
+.sn-component .circle {
+  display: inline-block !important;
+}

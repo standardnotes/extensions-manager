@@ -123,9 +123,16 @@ var BridgeManager = function () {
   function BridgeManager(onReceieveItems) {
     _classCallCheck(this, BridgeManager);
 
+    BridgeManager.EventSaving = "EventSaving";
+    BridgeManager.EventDoneSaving = "EventDoneSaving";
+    BridgeManager.EventDownloadingPackages = "EventDownloadingPackages";
+    BridgeManager.EventDoneDownloadingPackages = "EventDoneDownloadingPackages";
+    BridgeManager.EventUpdatedValidUntil = "EventUpdatedValidUntil";
+
     this.updateObservers = [];
     this.items = [];
     this.packages = [];
+    this.eventHandlers = [];
     this.size = null;
   }
 
@@ -142,6 +149,39 @@ var BridgeManager = function () {
     key: "getItemAppDataValue",
     value: function getItemAppDataValue(item, key) {
       return this.componentManager.getItemAppDataValue(item, key);
+    }
+  }, {
+    key: "addEventHandler",
+    value: function addEventHandler(handler) {
+      this.eventHandlers.push(handler);
+    }
+  }, {
+    key: "notifyEvent",
+    value: function notifyEvent(event, data) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.eventHandlers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var handler = _step.value;
+
+          handler(event, data || {});
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
     }
   }, {
     key: "registerPackages",
@@ -172,13 +212,13 @@ var BridgeManager = function () {
 
       this._didBeginStreaming = true;
       this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], function (items) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
 
         try {
-          for (var _iterator = items[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var item = _step.value;
+          for (var _iterator2 = items[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var item = _step2.value;
 
             if (item.deleted) {
               _this.removeItemFromItems(item);
@@ -196,16 +236,16 @@ var BridgeManager = function () {
             }
           }
         } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
             }
           } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
+            if (_didIteratorError2) {
+              throw _iteratorError2;
             }
           }
         }
@@ -238,27 +278,27 @@ var BridgeManager = function () {
   }, {
     key: "notifyObserversOfUpdate",
     value: function notifyObserversOfUpdate() {
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator2 = this.updateObservers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var observer = _step2.value;
+        for (var _iterator3 = this.updateObservers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var observer = _step3.value;
 
           observer.callback();
         }
       } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
           }
         } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
@@ -374,7 +414,11 @@ var BridgeManager = function () {
   }, {
     key: "saveItems",
     value: function saveItems(items, callback) {
+      var _this3 = this;
+
+      this.notifyEvent(BridgeManager.EventSaving);
       this.componentManager.saveItems(items, function () {
+        _this3.notifyEvent(BridgeManager.EventDoneSaving);
         callback && callback();
       });
     }
@@ -414,14 +458,14 @@ var BridgeManager = function () {
   }, {
     key: "updateComponent",
     value: function updateComponent(component) {
-      var _this3 = this;
+      var _this4 = this;
 
       var latestPackageInfo = this.latestPackageInfoForComponent(component);;
 
       component.content.package_info.download_url = latestPackageInfo.download_url;
 
       this.componentManager.saveItems([component], function () {
-        _this3.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {});
+        _this4.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {});
       });
     }
   }, {
@@ -590,10 +634,10 @@ var RepoController = function () {
 
       _HttpManager2.default.get().getAbsolute(this.repo.url, {}, function (response) {
         _this.response = response;
-        callback(response.packages);
+        callback(response);
       }, function (error) {
         console.log("Error loading repo", error);
-        callback(null, error || {});
+        callback(null);
       });
     }
   }]);
@@ -2169,11 +2213,61 @@ var Home = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (Home.__proto__ || Object.getPrototypeOf(Home)).call(this, props));
 
+    _this.refreshValidUntil = function () {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = _this.repoRefs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var ref = _step.value;
+
+          ref.refreshRepo();
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    };
+
+    _this.addRepoRef = function (ref) {
+      if (ref && !_this.repoRefs.includes(ref)) {
+        _this.repoRefs.push(ref);
+      }
+    };
+
+    _this.isExpired = function () {
+      return !_this.state.validUntil || _this.state.validUntil < new Date();
+    };
+
+    _this.repoRefs = [];
     _this.state = { repos: [] };
 
     _BridgeManager2.default.get().initiateBridge(function () {
       _this.setState({ ready: true });
       _this.reload();
+    });
+
+    _BridgeManager2.default.get().addEventHandler(function (event, data) {
+      if (event == _BridgeManager2.default.EventDownloadingPackages) {
+        _this.setState({ downloading: true });
+      } else if (event == _BridgeManager2.default.EventDoneDownloadingPackages) {
+        setTimeout(function () {
+          _this.setState({ downloading: false });
+        }, 300);
+      } else if (event == _BridgeManager2.default.EventUpdatedValidUntil) {
+        _this.setState({ validUntil: data.valid_until });
+      }
     });
 
     _BridgeManager2.default.get().addUpdateObserver(function () {
@@ -2195,6 +2289,8 @@ var Home = function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       return _react2.default.createElement(
         "div",
         { id: "home", className: "panel static" },
@@ -2202,9 +2298,51 @@ var Home = function (_React$Component) {
           "div",
           { className: "content" },
           this.state.ready && this.state.repos.length == 0 && _react2.default.createElement(_InstallRepo2.default, null),
+          this.state.downloading && _react2.default.createElement(
+            "div",
+            null,
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row justify-left horizontal-group" },
+              _react2.default.createElement("div", { className: "spinner info small" }),
+              _react2.default.createElement(
+                "h4",
+                null,
+                "Refreshing packages..."
+              ),
+              _react2.default.createElement("hr", null)
+            ),
+            _react2.default.createElement("div", { className: "panel-row" })
+          ),
+          !this.state.downloading && this.state.validUntil && _react2.default.createElement(
+            "div",
+            null,
+            _react2.default.createElement(
+              "div",
+              { className: "panel-row justify-left horizontal-group" },
+              _react2.default.createElement("div", { className: "circle small " + (this.isExpired() ? "danger" : "success") }),
+              _react2.default.createElement(
+                "p",
+                null,
+                "Your Extended benefits ",
+                this.isExpired() ? "expired on" : "are valid until",
+                " ",
+                this.state.validUntil.toLocaleString()
+              ),
+              _react2.default.createElement(
+                "a",
+                { className: "info", onClick: this.refreshValidUntil },
+                " Refresh "
+              ),
+              _react2.default.createElement("hr", null)
+            ),
+            _react2.default.createElement("div", { className: "panel-row" })
+          ),
           _react2.default.createElement(_ManageInstalled2.default, null),
           this.state.repos.map(function (repo, index) {
-            return _react2.default.createElement(_RepoView2.default, { key: index, repo: repo });
+            return _react2.default.createElement(_RepoView2.default, { key: index, repo: repo, ref: function ref(_ref) {
+                _this2.addRepoRef(_ref);
+              } });
           })
         ),
         _react2.default.createElement(
@@ -2289,15 +2427,7 @@ var RepoView = function (_React$Component) {
     _this.needsUpdateComponents = true;
 
     _this.repoController = new _RepoController2.default({ repo: props.repo });
-    _this.repoController.getPackages(function (packages, error) {
-      if (!error) {
-        _BridgeManager2.default.get().registerPackages(packages);
-        _this.setState({ packages: packages || [] });
-        if (_this.receivedBridgeItems && _this.needsUpdateComponents) {
-          _this.updateComponentsWithNewPackageInfo();
-        }
-      }
-    });
+    _this.refreshRepo();
 
     _this.updateObserver = _BridgeManager2.default.get().addUpdateObserver(function () {
       _this.receivedBridgeItems = true;
@@ -2310,6 +2440,26 @@ var RepoView = function (_React$Component) {
   }
 
   _createClass(RepoView, [{
+    key: "refreshRepo",
+    value: function refreshRepo() {
+      var _this2 = this;
+
+      _BridgeManager2.default.get().notifyEvent(_BridgeManager2.default.EventDownloadingPackages);
+      this.repoController.getPackages(function (response) {
+        _BridgeManager2.default.get().notifyEvent(_BridgeManager2.default.EventDoneDownloadingPackages);
+        if (response) {
+          var packages = response.packages;
+          var valid_until = new Date(response.valid_until);
+          _BridgeManager2.default.get().notifyEvent(_BridgeManager2.default.EventUpdatedValidUntil, { valid_until: valid_until });
+          _BridgeManager2.default.get().registerPackages(packages);
+          _this2.setState({ packages: packages || [] });
+          if (_this2.receivedBridgeItems) {
+            _this2.updateComponentsWithNewPackageInfo();
+          }
+        }
+      });
+    }
+  }, {
     key: "updateComponentsWithNewPackageInfo",
     value: function updateComponentsWithNewPackageInfo() {
       this.needsUpdateComponents = false;
@@ -2328,7 +2478,7 @@ var RepoView = function (_React$Component) {
             var needsSave = false;
             var validUntil = new Date(packageInfo.valid_until);
             // .getTime() must be used to compare dates
-            if (!installed.content.valid_until || installed.content.valid_until.getTime() !== validUntil.getTime()) {
+            if (packageInfo.valid_until && (!installed.content.valid_until || installed.content.valid_until.getTime() !== validUntil.getTime())) {
               installed.content.valid_until = validUntil;
               needsSave = true;
             }
@@ -2506,6 +2656,11 @@ var ComponentManager = function () {
         var originalMessage = this.sentMessages.filter(function (message) {
           return message.messageId === payload.original.messageId;
         })[0];
+
+        if (!originalMessage) {
+          // Connection must have been reset. Alert the user.
+          alert("This extension is attempting to communicate with Standard Notes, but an error is preventing it from doing so. Please restart this extension and try again.");
+        }
 
         if (originalMessage.callback) {
           originalMessage.callback(payload.data);
@@ -2730,12 +2885,22 @@ var ComponentManager = function () {
   }, {
     key: "saveItem",
     value: function saveItem(item, callback) {
-      this.saveItems([item], callback);
+      var skipDebouncer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      this.saveItems([item], callback, skipDebouncer);
     }
+
+    /*
+    skipDebouncer allows saves to go through right away rather than waiting for timeout.
+    This should be used when saving items via other means besides keystrokes.
+     */
+
   }, {
     key: "saveItems",
     value: function saveItems(items, callback) {
       var _this3 = this;
+
+      var skipDebouncer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
       items = items.map(function (item) {
         item.updated_at = new Date();
@@ -2757,7 +2922,7 @@ var ComponentManager = function () {
          Note: it's important to modify saving items updated_at immediately and not after delay. If you modify after delay,
         a delayed sync could just be wrapping up, and will send back old data and replace what the user has typed.
       */
-      if (this.coallesedSaving == true) {
+      if (this.coallesedSaving == true && !skipDebouncer) {
         if (this.pendingSave) {
           clearTimeout(this.pendingSave);
         }
@@ -2765,6 +2930,8 @@ var ComponentManager = function () {
         this.pendingSave = setTimeout(function () {
           saveBlock();
         }, this.coallesedSavingDelay);
+      } else {
+        saveBlock();
       }
     }
   }, {
