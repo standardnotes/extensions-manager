@@ -1,13 +1,12 @@
 html, body {
-  font-size: 16px;
+  font-size: var(--sn-stylekit-base-font-size);
   margin: 0;
 }
 
-.panel {
+.sk-panel {
   height: 100%;
-  background-color: white;
 
-  .footer {
+  .sk-panel-footer {
     font-size: 15px;
   }
 }
@@ -32,9 +31,11 @@ html, body {
   .name-input {
     font-size: 0.95rem;
     font-weight: bold;
+    color: var(--sn-stylekit-foreground-color);
+    background-color: transparent;
 
     &[type="text"][disabled] {
-      color: black;
+      color: var(--sn-stylekit-foreground-color);
       background-color: transparent;
     }
   }
@@ -42,6 +43,10 @@ html, body {
 
 .item-advanced-options {
   margin-top: 15px;
+
+  label {
+    display: block;
+  }
 }
 
 input.disguised {
@@ -59,6 +64,6 @@ input.disguised {
 
 @import '~stylekit';
 
-.sn-component .circle {
+.sn-component .sk-circle {
   display: inline-block !important;
 }

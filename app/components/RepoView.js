@@ -99,22 +99,25 @@ export default class RepoView extends React.Component {
 
   render() {
     return (
-      <div className="panel-section">
-        <div className="panel-row">
-          <h3 className="title">Repository</h3>
+      <div className="sk-panel-section">
+
+        <div className="sk-panel-section">
+          <div className="sk-panel-row">
+            <div className="sk-panel-section-title info sk-bold">Repository</div>
+          </div>
+
           <a onClick={this.toggleOptions} className="info">Options</a>
+          {this.state.showOptions &&
+            <div className="sk-panel-row">
+              <a onClick={this.deleteRepo} className="danger sk-a">Delete Repository</a>
+            </div>
+          }
         </div>
 
-        {this.state.showOptions &&
-            <div className="panel-row">
-              <a onClick={this.deleteRepo} className="danger">Delete</a>
-            </div>
-        }
-
-        <div className="panel-row">
-          <div className="packages panel-table">
+        <div className="sk-panel-row">
+          <div className="packages sk-panel-table">
             {this.state.packages.map((p, index) =>
-              <div className="package table-item">
+              <div className="package sk-panel-table-item">
                 <PackageView key={p.identifier} packageInfo={p} />
               </div>
             )}

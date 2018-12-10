@@ -62,33 +62,34 @@ export default class Home extends React.Component {
 
   render() {
     return (
-      <div id="home" className="panel static">
-        <div className="content">
+      <div id="home" className="sk-panel static">
+        <div className="sk-panel-content">
           {this.state.ready && this.state.repos.length == 0 &&
             <InstallRepo />
           }
-          {this.state.downloading &&
-            <div>
-              <div className="panel-row justify-left horizontal-group">
-                <div className="spinner info small"></div>
-                <h4>Refreshing packages...</h4>
-                <hr/>
-              </div>
-              <div className="panel-row"/>
-            </div>
-          }
 
-          {!this.state.downloading && this.state.validUntil &&
-            <div>
-              <div className="panel-row justify-left horizontal-group">
-                <div className={"circle small " + (this.isExpired() ? "danger" : "success")} />
-                <p>Your Extended benefits {this.isExpired() ? "expired on" : "are valid until"} {this.state.validUntil.toLocaleString()}</p>
-                <a className="info" onClick={this.refreshValidUntil}> Refresh </a>
-                <hr/>
+          <div className="sk-panel-section no-bottom-pad">
+            {this.state.downloading &&
+              <div>
+                <div className="sk-panel-row justify-left sk-horizontal-group">
+                  <div className="sk-spinner info small"></div>
+                  <p>Refreshing packages...</p>
+                </div>
+                <div className="sk-panel-row"/>
               </div>
-              <div className="panel-row"/>
-            </div>
-          }
+            }
+
+            {!this.state.downloading && this.state.validUntil &&
+              <div>
+                <div className="sk-panel-row justify-left sk-horizontal-group">
+                  <div className={"sk-circle small " + (this.isExpired() ? "danger" : "success")} />
+                  <p>Your Extended benefits {this.isExpired() ? "expired on" : "are valid until"} {this.state.validUntil.toLocaleString()}</p>
+                  <a className="info" onClick={this.refreshValidUntil}> Refresh </a>
+                </div>
+                <div className="sk-panel-row"/>
+              </div>
+            }
+          </div>
 
           <ManageInstalled />
 
@@ -97,7 +98,7 @@ export default class Home extends React.Component {
           )}
         </div>
 
-        <div className="footer">
+        <div className="sk-panel-footer">
           <div className="right">
             <Advanced />
           </div>

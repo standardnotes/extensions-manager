@@ -35,11 +35,14 @@ export default class ManageInstalled extends React.Component {
       return a.content.name > b.content.name;
     });
     return (
-      <div className="panel-section">
-        <h4 className="title panel-row">{title} ({extensions.length})</h4>
-        <div className="packages panel-table panel-row">
+
+      <div className="sk-panel-section">
+        <div className="sk-panel-row" />
+        <div className="sk-h4 sk-bold sk-panel-row">{title}</div>
+        <div className="sk-panel-row" />
+        <div className="packages sk-panel-table sk-panel-row">
           {extensions.map((ext, index) =>
-            <div className="package table-item">
+            <div className="package sk-panel-table-item">
               <PackageView key={ext.uuid} component={ext} hideMeta={true} />
             </div>
           )}
@@ -58,11 +61,11 @@ export default class ManageInstalled extends React.Component {
     var other = extensions.subtract(themes).subtract(editors).subtract(components).subtract(serverExtensions).subtract(actions);
 
     return (
-      <div className="panel-section no-border">
+      <div className="sk-panel-section no-border">
 
-        <div className="panel-row">
-          <h3 className="title">Installed Extensions ({extensions.length})</h3>
-        </div>
+        <div className="sk-panel-row" />
+        <div className="sk-panel-row" />
+        <div className="sk-panel-section-outer-title info sk-bold">Installed Extensions ({extensions.length})</div>
 
         {themes.length > 0 &&
           this.category("Themes", themes)

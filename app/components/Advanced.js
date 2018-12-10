@@ -72,21 +72,21 @@ export default class Advanced extends React.Component {
       extType = BridgeManager.get().humanReadableTitleForExtensionType(packageDetails.content_type);
     }
     return (
-      <div className="panel-section no-bottom-pad">
-          <div className="horizontal-group">
+      <div className="sk-panel-section no-bottom-pad">
+          <div className="sk-horizontal-group">
             <a onClick={this.toggleForm} className="info">Import Extension</a>
           </div>
 
           {this.state.success &&
-            <div className="panel-row justify-right">
-              <p className="success">Extension successfully installed.</p>
+            <div className="sk-panel-row justify-right">
+              <div className="sk-p success">Extension successfully installed.</div>
             </div>
           }
 
           {this.state.showForm &&
-            <div className="panel-row">
+            <div className="sk-panel-row">
               <input
-                className=""
+                className="sk-input contrast"
                 placeholder={"Enter Extension Link"}
                 type="url"
                 autoFocus={true}
@@ -98,64 +98,67 @@ export default class Advanced extends React.Component {
           }
 
           {packageDetails &&
-            <div className="notification info panel-row justify-left" style={{textAlign: "center"}}>
-              <div className="panel-column stretch">
+            <div className="sk-notification info sk-panel-row justify-left" style={{textAlign: "center"}}>
+              <div className="sk-panel-column stretch">
                 <h2 className="title">Confirm Installation</h2>
 
-                <div className="panel-row centered">
+                <div className="sk-panel-row centered">
                   <div>
-                    <p><strong>Name: </strong></p>
-                    <p>{packageDetails.name}</p>
+                    <div className="sk-p"><strong>Name: </strong></div>
+                    <div className="sk-p">{packageDetails.name}</div>
                   </div>
                 </div>
 
-                <div className="panel-row centered">
+                <div className="sk-panel-row centered">
                   <div>
-                    <p><strong>Description: </strong></p>
-                    <p>{packageDetails.description}</p>
+                    <div className="sk-p"><strong>Description: </strong></div>
+                    <div className="sk-p">{packageDetails.description}</div>
                   </div>
                 </div>
 
                 {packageDetails.version &&
-                  <div className="panel-row centered">
+                  <div className="sk-panel-row centered">
                     <div>
-                      <p><strong>Version: </strong></p>
-                      <p>{packageDetails.version}</p>
+                      <div className="sk-p"><strong>Version: </strong></div>
+                      <div className="sk-p">{packageDetails.version}</div>
                     </div>
                   </div>
                 }
 
-                <div className="panel-row centered">
+                <div className="sk-panel-row centered">
                   <div>
-                    <p><strong>Hosted URL: </strong></p>
-                    <p>{packageDetails.url}</p>
+                    <div className="sk-p"><strong>Hosted URL: </strong></div>
+                    <div className="sk-p">{packageDetails.url}</div>
                   </div>
                 </div>
 
                 {packageDetails.download_url &&
-                  <div className="panel-row centered">
+                  <div className="sk-panel-row centered">
                     <div>
-                      <p><strong>Download URL: </strong></p>
-                      <p>{packageDetails.download_url}</p>
+                      <div className="sk-p"><strong>Download URL: </strong></div>
+                      <div className="sk-p">{packageDetails.download_url}</div>
                     </div>
                   </div>
                 }
 
-                <div className="panel-row centered">
+                <div className="sk-panel-row centered">
                   <div>
-                    <p><strong>Extension Type: </strong></p>
-                    <p>{extType}</p>
+                    <div className="sk-p"><strong>Extension Type: </strong></div>
+                    <div className="sk-p">{extType}</div>
                   </div>
                 </div>
 
-                <div className="panel-row centered">
-                  <div onClick={this.confirmInstallation} className="button info">
-                    <div className="label">Install</div>
+
+                <div className="sk-panel-row centered sk-horizontal-group">
+                  <div onClick={this.cancelInstallation} className="sk-button neutral">
+                    <div className="sk-label">Cancel</div>
+                  </div>
+
+                  <div onClick={this.confirmInstallation} className="sk-button sk-base">
+                    <div className="sk-label">Install</div>
                   </div>
                 </div>
-                <div className="panel-row centered">
-                  <a className="danger" onClick={this.cancelInstallation}>Cancel</a>
-                </div>
+                
               </div>
             </div>
           }

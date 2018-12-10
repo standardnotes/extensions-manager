@@ -135,8 +135,8 @@ export default class PackageView extends React.Component {
     let displayName = component ? component.content.name : packageInfo.name;
 
     return [
-        <div className="item-content">
-          <div className="item-column stretch">
+        <div className="sk-panel-table-item-content">
+          <div className="sk-panel-table-item-column stretch">
             {packageInfo.thumbnail_url && !this.props.hideMeta &&
               <img src={packageInfo.thumbnail_url} />
             }
@@ -144,7 +144,7 @@ export default class PackageView extends React.Component {
             <input
               ref={(input) => { this.nameInput = input; }}
               type="text"
-              className="panel-row disguised name-input"
+              className="sk-panel-row disguised name-input sk-input sk-label"
               disabled={!this.state.rename}
               value={this.state.renameValue || displayName}
               onKeyPress={this.handleKeyPress}
@@ -152,16 +152,16 @@ export default class PackageView extends React.Component {
             />
 
             {component && installError &&
-              <div className="notification warning package-notification">
-                <div className="text">
+              <div className="sk-notification warning package-notification">
+                <div className="sk-notification-text">
                   Error installing locally: {installError.tag} {packageInfo.download_url}
                 </div>
               </div>
             }
 
             {component && !componentPackageInfo && shouldHavePackageInfo &&
-              <div className="notification default package-notification" onClick={() => {this.setState({componentWarningExpanded: !this.state.componentWarningExpanded})}}>
-                <div className="text">
+              <div className="sk-notification neutral package-notification" onClick={() => {this.setState({componentWarningExpanded: !this.state.componentWarningExpanded})}}>
+                <div className="sk-notification-text">
                   Unable to find corresponding package information.
                   {this.state.componentWarningExpanded
                     ? <span> Please uninstall this extension, then reinstall to enable local installation and updates.</span>
@@ -172,78 +172,92 @@ export default class PackageView extends React.Component {
             }
 
             {!this.props.hideMeta &&
-              <div className="panel-row">
-                <p>{packageInfo.description}</p>
+              <div className="sk-panel-row">
+                <div className="sk-p">{packageInfo.description}</div>
               </div>
             }
           </div>
         </div>,
 
-        <div className="item-footer">
-          <div className="button-group">
+        <div className="sk-panel-table-item-footer">
+          <div className="sk-segmented-buttons">
             {!component &&
-              <div className="button info" onClick={this.togglePackageInstallation}>
-                Install
+              <div className="sk-button info" onClick={this.togglePackageInstallation}>
+                <div className="sk-label">
+                  Install
+                </div>
               </div>
             }
 
             {showOpenOption &&
-              <div className="button success" onClick={this.openComponent}>
-                Open
+              <div className="sk-button success" onClick={this.openComponent}>
+                <div className="sk-label">
+                  Open
+                </div>
               </div>
             }
 
             {showActivateOption &&
 
-              <div className={"button " + (isComponentActive ? "warning" : "success")} onClick={this.openComponent}>
-                {isComponentActive ? "Deactivate" : "Activate"}
+              <div className={"sk-button " + (isComponentActive ? "warning" : "success")} onClick={this.openComponent}>
+                <div className="sk-label">
+                  {isComponentActive ? "Deactivate" : "Activate"}
+                </div>
               </div>
             }
 
             {isDesktop && updateAvailable &&
-              <div className="button info" onClick={this.updateComponent}>
-                Update
+              <div className="sk-button info" onClick={this.updateComponent}>
+                <div className="sk-label">
+                  Update
+                </div>
               </div>
             }
 
             {component &&
-              <div className="button danger" onClick={this.togglePackageInstallation}>
-                Uninstall
+              <div className="sk-button danger" onClick={this.togglePackageInstallation}>
+                <div className="sk-label">
+                  Uninstall
+                </div>
               </div>
             }
 
             {component && componentPackageInfo &&
-              <div className="button default" onClick={this.toggleOptions}>
-                •••
+              <div className="sk-button contrast" onClick={this.toggleOptions}>
+                <div className="sk-label">
+                  •••
+                </div>
               </div>
             }
 
             {packageInfo.marketing_url &&
-              <div className="button default" onClick={() => {this.openUrl(packageInfo.marketing_url)}}>
-                Info
+              <div className="sk-button contrast" onClick={() => {this.openUrl(packageInfo.marketing_url)}}>
+                <div className="sk-label">
+                  Info
+                </div>
               </div>
             }
           </div>
 
           {this.state.showOptions && component &&
-            <div className="notification default item-advanced-options">
+            <div className="sk-notification contrast item-advanced-options">
               {isDesktop && localInstallable &&
                 <div>
                   {component &&
-                    <p className="panel-row">Installed Version: {installedVersion}</p>
+                    <div className="sk-p sk-panel-row">Installed Version: {installedVersion}</div>
                   }
-                  <p className="panel-row">Latest Version: {latestVersion}</p>
+                  <div className="sk-p sk-panel-row">Latest Version: {latestVersion}</div>
                 </div>
               }
 
               {localInstallable &&
                 <div>
-                  <label>
+                  <label className="sk-label">
                     <input disabled={!localInstallable} checked={localInstallable && !component.content.autoupdateDisabled} onChange={() => {this.toggleComponentOption('autoupdateDisabled')}} type="checkbox" />
                     Autoupdate local installation
                   </label>
 
-                  <label>
+                  <label className="sk-label">
                     <input disabled={!localInstallable} checked={localInstallable && !component.content.offlineOnly} onChange={() => {this.toggleComponentOption('offlineOnly')}} type="checkbox" />
                     Use hosted when local is unavailable
                   </label>
@@ -251,11 +265,11 @@ export default class PackageView extends React.Component {
               }
 
               {!localInstallable &&
-                <p className="panel-row">This extension does not support local installation.</p>
+                <div className="sk-p sk-panel-row">This extension does not support local installation.</div>
               }
 
 
-              <a className="info" onClick={this.toggleRename}>{this.state.rename ? 'Press enter to submit' : 'Rename'}</a>
+              <a className="info sk-a sk-panel-row" onClick={this.toggleRename}>{this.state.rename ? 'Press enter to submit' : 'Rename'}</a>
             </div>
           }
         </div>

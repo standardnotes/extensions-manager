@@ -41,13 +41,13 @@ export default class InstallRepo extends React.Component {
 
   render() {
     return (
-      <div id="install-repo" className="panel-section">
-        <div className="panel-row centered">
-          <h1 className="title"><strong>Enter Your Extended Activation Code</strong></h1>
+      <div id="install-repo" className="sk-panel-section">
+        <div className="sk-panel-row centered">
+          <div className="sk-h1"><strong>Enter Your Extended Activation Code</strong></div>
         </div>
-        <div className="notification info dashed one-line">
+        <div className="sk-notification sk-secondary-contrast dashed one-line">
           <input
-            className="info clear center-text"
+            className="sk-input sk-secondary-contrast center-text"
             placeholder="Enter Extended Code"
             type="url"
             value={this.state.url}
@@ -57,24 +57,24 @@ export default class InstallRepo extends React.Component {
         </div>
 
         {this.state.url && this.state.url.length > 0 &&
-          <div id="submit-button" className="panel-row centered">
-            <a onClick={this.submitUrl} className="button success big">
-              <div className="label">
+          <div id="submit-button" className="sk-panel-row centered">
+            <a onClick={this.submitUrl} className="sk-button success big">
+              <div className="sk-label">
                 Submit Code
               </div>
             </a>
           </div>
         }
 
-        <div className="panel-row centered">
-          <h1 className="title center-text">
+        <div className="sk-panel-row centered">
+          <div className="sk-h1 center-text">
             <strong>Standard Notes Extended</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.
-          </h1>
+          </div>
         </div>
-        <div className="panel-row" />
-        <div className="panel-row centered">
+        <div className="sk-panel-row" />
+        <div className="sk-panel-row centered">
           <a href="https://standardnotes.org/extensions" target="_blank" className="button info big">
-            <div className="label">
+            <div className="sk-label">
               Learn More
             </div>
           </a>

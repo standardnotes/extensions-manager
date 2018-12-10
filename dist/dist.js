@@ -142,8 +142,6 @@ var BridgeManager = function () {
       this.componentManager = new _snComponentsApi2.default([], function () {
         onReady && onReady();
       });
-
-      this.componentManager.acceptsThemes = false;
     }
   }, {
     key: "getItemAppDataValue",
@@ -1039,17 +1037,17 @@ var PackageView = function (_React$Component) {
 
       return [_react2.default.createElement(
         "div",
-        { className: "item-content" },
+        { className: "sk-panel-table-item-content" },
         _react2.default.createElement(
           "div",
-          { className: "item-column stretch" },
+          { className: "sk-panel-table-item-column stretch" },
           packageInfo.thumbnail_url && !this.props.hideMeta && _react2.default.createElement("img", { src: packageInfo.thumbnail_url }),
           _react2.default.createElement("input", {
             ref: function ref(input) {
               _this2.nameInput = input;
             },
             type: "text",
-            className: "panel-row disguised name-input",
+            className: "sk-panel-row disguised name-input sk-input sk-label",
             disabled: !this.state.rename,
             value: this.state.renameValue || displayName,
             onKeyPress: this.handleKeyPress,
@@ -1057,10 +1055,10 @@ var PackageView = function (_React$Component) {
           }),
           component && installError && _react2.default.createElement(
             "div",
-            { className: "notification warning package-notification" },
+            { className: "sk-notification warning package-notification" },
             _react2.default.createElement(
               "div",
-              { className: "text" },
+              { className: "sk-notification-text" },
               "Error installing locally: ",
               installError.tag,
               " ",
@@ -1069,12 +1067,12 @@ var PackageView = function (_React$Component) {
           ),
           component && !componentPackageInfo && shouldHavePackageInfo && _react2.default.createElement(
             "div",
-            { className: "notification default package-notification", onClick: function onClick() {
+            { className: "sk-notification neutral package-notification", onClick: function onClick() {
                 _this2.setState({ componentWarningExpanded: !_this2.state.componentWarningExpanded });
               } },
             _react2.default.createElement(
               "div",
-              { className: "text" },
+              { className: "sk-notification-text" },
               "Unable to find corresponding package information.",
               this.state.componentWarningExpanded ? _react2.default.createElement(
                 "span",
@@ -1085,73 +1083,101 @@ var PackageView = function (_React$Component) {
           ),
           !this.props.hideMeta && _react2.default.createElement(
             "div",
-            { className: "panel-row" },
+            { className: "sk-panel-row" },
             _react2.default.createElement(
-              "p",
-              null,
+              "div",
+              { className: "sk-p" },
               packageInfo.description
             )
           )
         )
       ), _react2.default.createElement(
         "div",
-        { className: "item-footer" },
+        { className: "sk-panel-table-item-footer" },
         _react2.default.createElement(
           "div",
-          { className: "button-group" },
+          { className: "sk-segmented-buttons" },
           !component && _react2.default.createElement(
             "div",
-            { className: "button info", onClick: this.togglePackageInstallation },
-            "Install"
+            { className: "sk-button info", onClick: this.togglePackageInstallation },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              "Install"
+            )
           ),
           showOpenOption && _react2.default.createElement(
             "div",
-            { className: "button success", onClick: this.openComponent },
-            "Open"
+            { className: "sk-button success", onClick: this.openComponent },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              "Open"
+            )
           ),
           showActivateOption && _react2.default.createElement(
             "div",
-            { className: "button " + (isComponentActive ? "warning" : "success"), onClick: this.openComponent },
-            isComponentActive ? "Deactivate" : "Activate"
+            { className: "sk-button " + (isComponentActive ? "warning" : "success"), onClick: this.openComponent },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              isComponentActive ? "Deactivate" : "Activate"
+            )
           ),
           isDesktop && updateAvailable && _react2.default.createElement(
             "div",
-            { className: "button info", onClick: this.updateComponent },
-            "Update"
+            { className: "sk-button info", onClick: this.updateComponent },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              "Update"
+            )
           ),
           component && _react2.default.createElement(
             "div",
-            { className: "button danger", onClick: this.togglePackageInstallation },
-            "Uninstall"
+            { className: "sk-button danger", onClick: this.togglePackageInstallation },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              "Uninstall"
+            )
           ),
           component && componentPackageInfo && _react2.default.createElement(
             "div",
-            { className: "button default", onClick: this.toggleOptions },
-            "\u2022\u2022\u2022"
+            { className: "sk-button contrast", onClick: this.toggleOptions },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              "\u2022\u2022\u2022"
+            )
           ),
           packageInfo.marketing_url && _react2.default.createElement(
             "div",
-            { className: "button default", onClick: function onClick() {
+            { className: "sk-button contrast", onClick: function onClick() {
                 _this2.openUrl(packageInfo.marketing_url);
               } },
-            "Info"
+            _react2.default.createElement(
+              "div",
+              { className: "sk-label" },
+              "Info"
+            )
           )
         ),
         this.state.showOptions && component && _react2.default.createElement(
           "div",
-          { className: "notification default item-advanced-options" },
+          { className: "sk-notification contrast item-advanced-options" },
           isDesktop && localInstallable && _react2.default.createElement(
             "div",
             null,
             component && _react2.default.createElement(
-              "p",
-              { className: "panel-row" },
+              "div",
+              { className: "sk-p sk-panel-row" },
               "Installed Version: ",
               installedVersion
             ),
             _react2.default.createElement(
-              "p",
-              { className: "panel-row" },
+              "div",
+              { className: "sk-p sk-panel-row" },
               "Latest Version: ",
               latestVersion
             )
@@ -1161,7 +1187,7 @@ var PackageView = function (_React$Component) {
             null,
             _react2.default.createElement(
               "label",
-              null,
+              { className: "sk-label" },
               _react2.default.createElement("input", { disabled: !localInstallable, checked: localInstallable && !component.content.autoupdateDisabled, onChange: function onChange() {
                   _this2.toggleComponentOption('autoupdateDisabled');
                 }, type: "checkbox" }),
@@ -1169,7 +1195,7 @@ var PackageView = function (_React$Component) {
             ),
             _react2.default.createElement(
               "label",
-              null,
+              { className: "sk-label" },
               _react2.default.createElement("input", { disabled: !localInstallable, checked: localInstallable && !component.content.offlineOnly, onChange: function onChange() {
                   _this2.toggleComponentOption('offlineOnly');
                 }, type: "checkbox" }),
@@ -1177,13 +1203,13 @@ var PackageView = function (_React$Component) {
             )
           ),
           !localInstallable && _react2.default.createElement(
-            "p",
-            { className: "panel-row" },
+            "div",
+            { className: "sk-p sk-panel-row" },
             "This extension does not support local installation."
           ),
           _react2.default.createElement(
             "a",
-            { className: "info", onClick: this.toggleRename },
+            { className: "info sk-a sk-panel-row", onClick: this.toggleRename },
             this.state.rename ? 'Press enter to submit' : 'Rename'
           )
         )
@@ -1259,22 +1285,21 @@ var ManageInstalled = function (_React$Component) {
       });
       return _react2.default.createElement(
         "div",
-        { className: "panel-section" },
-        _react2.default.createElement(
-          "h4",
-          { className: "title panel-row" },
-          title,
-          " (",
-          extensions.length,
-          ")"
-        ),
+        { className: "sk-panel-section" },
+        _react2.default.createElement("div", { className: "sk-panel-row" }),
         _react2.default.createElement(
           "div",
-          { className: "packages panel-table panel-row" },
+          { className: "sk-h4 sk-bold sk-panel-row" },
+          title
+        ),
+        _react2.default.createElement("div", { className: "sk-panel-row" }),
+        _react2.default.createElement(
+          "div",
+          { className: "packages sk-panel-table sk-panel-row" },
           extensions.map(function (ext, index) {
             return _react2.default.createElement(
               "div",
-              { className: "package table-item" },
+              { className: "package sk-panel-table-item" },
               _react2.default.createElement(_PackageView2.default, { key: ext.uuid, component: ext, hideMeta: true })
             );
           })
@@ -1323,17 +1348,15 @@ var ManageInstalled = function (_React$Component) {
 
       return _react2.default.createElement(
         "div",
-        { className: "panel-section no-border" },
+        { className: "sk-panel-section no-border" },
+        _react2.default.createElement("div", { className: "sk-panel-row" }),
+        _react2.default.createElement("div", { className: "sk-panel-row" }),
         _react2.default.createElement(
           "div",
-          { className: "panel-row" },
-          _react2.default.createElement(
-            "h3",
-            { className: "title" },
-            "Installed Extensions (",
-            extensions.length,
-            ")"
-          )
+          { className: "sk-panel-section-outer-title info sk-bold" },
+          "Installed Extensions (",
+          extensions.length,
+          ")"
         ),
         themes.length > 0 && this.category("Themes", themes),
         components.length > 0 && this.category("Components", components),
@@ -2293,50 +2316,52 @@ var Home = function (_React$Component) {
 
       return _react2.default.createElement(
         "div",
-        { id: "home", className: "panel static" },
+        { id: "home", className: "sk-panel static" },
         _react2.default.createElement(
           "div",
-          { className: "content" },
+          { className: "sk-panel-content" },
           this.state.ready && this.state.repos.length == 0 && _react2.default.createElement(_InstallRepo2.default, null),
-          this.state.downloading && _react2.default.createElement(
+          _react2.default.createElement(
             "div",
-            null,
-            _react2.default.createElement(
+            { className: "sk-panel-section no-bottom-pad" },
+            this.state.downloading && _react2.default.createElement(
               "div",
-              { className: "panel-row justify-left horizontal-group" },
-              _react2.default.createElement("div", { className: "spinner info small" }),
+              null,
               _react2.default.createElement(
-                "h4",
-                null,
-                "Refreshing packages..."
+                "div",
+                { className: "sk-panel-row justify-left sk-horizontal-group" },
+                _react2.default.createElement("div", { className: "sk-spinner info small" }),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  "Refreshing packages..."
+                )
               ),
-              _react2.default.createElement("hr", null)
+              _react2.default.createElement("div", { className: "sk-panel-row" })
             ),
-            _react2.default.createElement("div", { className: "panel-row" })
-          ),
-          !this.state.downloading && this.state.validUntil && _react2.default.createElement(
-            "div",
-            null,
-            _react2.default.createElement(
+            !this.state.downloading && this.state.validUntil && _react2.default.createElement(
               "div",
-              { className: "panel-row justify-left horizontal-group" },
-              _react2.default.createElement("div", { className: "circle small " + (this.isExpired() ? "danger" : "success") }),
+              null,
               _react2.default.createElement(
-                "p",
-                null,
-                "Your Extended benefits ",
-                this.isExpired() ? "expired on" : "are valid until",
-                " ",
-                this.state.validUntil.toLocaleString()
+                "div",
+                { className: "sk-panel-row justify-left sk-horizontal-group" },
+                _react2.default.createElement("div", { className: "sk-circle small " + (this.isExpired() ? "danger" : "success") }),
+                _react2.default.createElement(
+                  "p",
+                  null,
+                  "Your Extended benefits ",
+                  this.isExpired() ? "expired on" : "are valid until",
+                  " ",
+                  this.state.validUntil.toLocaleString()
+                ),
+                _react2.default.createElement(
+                  "a",
+                  { className: "info", onClick: this.refreshValidUntil },
+                  " Refresh "
+                )
               ),
-              _react2.default.createElement(
-                "a",
-                { className: "info", onClick: this.refreshValidUntil },
-                " Refresh "
-              ),
-              _react2.default.createElement("hr", null)
-            ),
-            _react2.default.createElement("div", { className: "panel-row" })
+              _react2.default.createElement("div", { className: "sk-panel-row" })
+            )
           ),
           _react2.default.createElement(_ManageInstalled2.default, null),
           this.state.repos.map(function (repo, index) {
@@ -2347,7 +2372,7 @@ var Home = function (_React$Component) {
         ),
         _react2.default.createElement(
           "div",
-          { className: "footer" },
+          { className: "sk-panel-footer" },
           _react2.default.createElement(
             "div",
             { className: "right" },
@@ -2533,40 +2558,44 @@ var RepoView = function (_React$Component) {
     value: function render() {
       return _react2.default.createElement(
         "div",
-        { className: "panel-section" },
+        { className: "sk-panel-section" },
         _react2.default.createElement(
           "div",
-          { className: "panel-row" },
+          { className: "sk-panel-section" },
           _react2.default.createElement(
-            "h3",
-            { className: "title" },
-            "Repository"
+            "div",
+            { className: "sk-panel-row" },
+            _react2.default.createElement(
+              "div",
+              { className: "sk-panel-section-title info sk-bold" },
+              "Repository"
+            )
           ),
           _react2.default.createElement(
             "a",
             { onClick: this.toggleOptions, className: "info" },
             "Options"
-          )
-        ),
-        this.state.showOptions && _react2.default.createElement(
-          "div",
-          { className: "panel-row" },
-          _react2.default.createElement(
-            "a",
-            { onClick: this.deleteRepo, className: "danger" },
-            "Delete"
+          ),
+          this.state.showOptions && _react2.default.createElement(
+            "div",
+            { className: "sk-panel-row" },
+            _react2.default.createElement(
+              "a",
+              { onClick: this.deleteRepo, className: "danger sk-a" },
+              "Delete Repository"
+            )
           )
         ),
         _react2.default.createElement(
           "div",
-          { className: "panel-row" },
+          { className: "sk-panel-row" },
           _react2.default.createElement(
             "div",
-            { className: "packages panel-table" },
+            { className: "packages sk-panel-table" },
             this.state.packages.map(function (p, index) {
               return _react2.default.createElement(
                 "div",
-                { className: "package table-item" },
+                { className: "package sk-panel-table-item" },
                 _react2.default.createElement(_PackageView2.default, { key: p.identifier, packageInfo: p })
               );
             })
@@ -2701,6 +2730,7 @@ var ComponentManager = function () {
 
       this.messageQueue = [];
       this.environment = data.environment;
+      this.platform = data.platform;
       this.uuid = data.uuid;
 
       if (this.onReadyCallback) {
@@ -2862,18 +2892,21 @@ var ComponentManager = function () {
     }
   }, {
     key: "deleteItem",
-    value: function deleteItem(item) {
-      this.deleteItems([item]);
+    value: function deleteItem(item, callback) {
+      this.deleteItems([item], callback);
     }
   }, {
     key: "deleteItems",
-    value: function deleteItems(items) {
+    value: function deleteItems(items, callback) {
       var params = {
         items: items.map(function (item) {
           return this.jsonObjectForItem(item);
         }.bind(this))
       };
-      this.postMessage("delete-items", params);
+
+      this.postMessage("delete-items", params, function (data) {
+        callback && callback(data);
+      });
     }
   }, {
     key: "sendCustomEvent",
@@ -2890,6 +2923,22 @@ var ComponentManager = function () {
       this.saveItems([item], callback, skipDebouncer);
     }
 
+    /* Presave allows clients to perform any actions last second before the save actually occurs (like setting previews).
+       Saves debounce by default, so if a client needs to compute a property on an item before saving, it's best to
+       hook into the debounce cycle so that clients don't have to implement their own debouncing.
+     */
+
+  }, {
+    key: "saveItemWithPresave",
+    value: function saveItemWithPresave(item, presave, callback) {
+      this.saveItemsWithPresave([item], presave, callback);
+    }
+  }, {
+    key: "saveItemsWithPresave",
+    value: function saveItemsWithPresave(items, presave, callback) {
+      this.saveItems(items, callback, false, presave);
+    }
+
     /*
     skipDebouncer allows saves to go through right away rather than waiting for timeout.
     This should be used when saving items via other means besides keystrokes.
@@ -2901,14 +2950,18 @@ var ComponentManager = function () {
       var _this3 = this;
 
       var skipDebouncer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-      items = items.map(function (item) {
-        item.updated_at = new Date();
-        return this.jsonObjectForItem(item);
-      }.bind(this));
+      var presave = arguments[3];
 
       var saveBlock = function saveBlock() {
-        _this3.postMessage("save-items", { items: items }, function (data) {
+        // presave block allows client to gain the benefit of performing something in the debounce cycle.
+        presave && presave();
+
+        var mappedItems = items.map(function (item) {
+          item.updated_at = new Date();
+          return this.jsonObjectForItem(item);
+        }.bind(_this3));
+
+        _this3.postMessage("save-items", { items: mappedItems }, function (data) {
           callback && callback();
         });
       };
@@ -3007,14 +3060,36 @@ var ComponentManager = function () {
   }, {
     key: "deactivateAllCustomThemes",
     value: function deactivateAllCustomThemes() {
-      var elements = document.getElementsByClassName("custom-theme");
+      // make copy, as it will be modified during loop
+      // `getElementsByClassName` is an HTMLCollection, not an Array
+      var elements = Array.from(document.getElementsByClassName("custom-theme")).slice();
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
-      [].forEach.call(elements, function (element) {
-        if (element) {
-          element.disabled = true;
-          element.parentNode.removeChild(element);
+      try {
+        for (var _iterator3 = elements[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var element = _step3.value;
+
+          if (element) {
+            element.disabled = true;
+            element.parentNode.removeChild(element);
+          }
         }
-      });
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
     }
 
     /* Utilities */
@@ -3222,13 +3297,13 @@ var InstallRepo = function (_React$Component) {
     value: function render() {
       return _react2.default.createElement(
         "div",
-        { id: "install-repo", className: "panel-section" },
+        { id: "install-repo", className: "sk-panel-section" },
         _react2.default.createElement(
           "div",
-          { className: "panel-row centered" },
+          { className: "sk-panel-row centered" },
           _react2.default.createElement(
-            "h1",
-            { className: "title" },
+            "div",
+            { className: "sk-h1" },
             _react2.default.createElement(
               "strong",
               null,
@@ -3238,9 +3313,9 @@ var InstallRepo = function (_React$Component) {
         ),
         _react2.default.createElement(
           "div",
-          { className: "notification info dashed one-line" },
+          { className: "sk-notification sk-secondary-contrast dashed one-line" },
           _react2.default.createElement("input", {
-            className: "info clear center-text",
+            className: "sk-input sk-secondary-contrast center-text",
             placeholder: "Enter Extended Code",
             type: "url",
             value: this.state.url,
@@ -3250,23 +3325,23 @@ var InstallRepo = function (_React$Component) {
         ),
         this.state.url && this.state.url.length > 0 && _react2.default.createElement(
           "div",
-          { id: "submit-button", className: "panel-row centered" },
+          { id: "submit-button", className: "sk-panel-row centered" },
           _react2.default.createElement(
             "a",
-            { onClick: this.submitUrl, className: "button success big" },
+            { onClick: this.submitUrl, className: "sk-button success big" },
             _react2.default.createElement(
               "div",
-              { className: "label" },
+              { className: "sk-label" },
               "Submit Code"
             )
           )
         ),
         _react2.default.createElement(
           "div",
-          { className: "panel-row centered" },
+          { className: "sk-panel-row centered" },
           _react2.default.createElement(
-            "h1",
-            { className: "title center-text" },
+            "div",
+            { className: "sk-h1 center-text" },
             _react2.default.createElement(
               "strong",
               null,
@@ -3275,16 +3350,16 @@ var InstallRepo = function (_React$Component) {
             " gives you access to powerful editors, extensions, tools, themes, and cloud backup options."
           )
         ),
-        _react2.default.createElement("div", { className: "panel-row" }),
+        _react2.default.createElement("div", { className: "sk-panel-row" }),
         _react2.default.createElement(
           "div",
-          { className: "panel-row centered" },
+          { className: "sk-panel-row centered" },
           _react2.default.createElement(
             "a",
             { href: "https://standardnotes.org/extensions", target: "_blank", className: "button info big" },
             _react2.default.createElement(
               "div",
-              { className: "label" },
+              { className: "sk-label" },
               "Learn More"
             )
           )
@@ -3415,10 +3490,10 @@ var Advanced = function (_React$Component) {
       }
       return _react2.default.createElement(
         "div",
-        { className: "panel-section no-bottom-pad" },
+        { className: "sk-panel-section no-bottom-pad" },
         _react2.default.createElement(
           "div",
-          { className: "horizontal-group" },
+          { className: "sk-horizontal-group" },
           _react2.default.createElement(
             "a",
             { onClick: this.toggleForm, className: "info" },
@@ -3427,18 +3502,18 @@ var Advanced = function (_React$Component) {
         ),
         this.state.success && _react2.default.createElement(
           "div",
-          { className: "panel-row justify-right" },
+          { className: "sk-panel-row justify-right" },
           _react2.default.createElement(
-            "p",
-            { className: "success" },
+            "div",
+            { className: "sk-p success" },
             "Extension successfully installed."
           )
         ),
         this.state.showForm && _react2.default.createElement(
           "div",
-          { className: "panel-row" },
+          { className: "sk-panel-row" },
           _react2.default.createElement("input", {
-            className: "",
+            className: "sk-input contrast",
             placeholder: "Enter Extension Link",
             type: "url",
             autoFocus: true,
@@ -3449,10 +3524,10 @@ var Advanced = function (_React$Component) {
         ),
         packageDetails && _react2.default.createElement(
           "div",
-          { className: "notification info panel-row justify-left", style: { textAlign: "center" } },
+          { className: "sk-notification info sk-panel-row justify-left", style: { textAlign: "center" } },
           _react2.default.createElement(
             "div",
-            { className: "panel-column stretch" },
+            { className: "sk-panel-column stretch" },
             _react2.default.createElement(
               "h2",
               { className: "title" },
@@ -3460,13 +3535,13 @@ var Advanced = function (_React$Component) {
             ),
             _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered" },
               _react2.default.createElement(
                 "div",
                 null,
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   _react2.default.createElement(
                     "strong",
                     null,
@@ -3474,21 +3549,21 @@ var Advanced = function (_React$Component) {
                   )
                 ),
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   packageDetails.name
                 )
               )
             ),
             _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered" },
               _react2.default.createElement(
                 "div",
                 null,
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   _react2.default.createElement(
                     "strong",
                     null,
@@ -3496,21 +3571,21 @@ var Advanced = function (_React$Component) {
                   )
                 ),
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   packageDetails.description
                 )
               )
             ),
             packageDetails.version && _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered" },
               _react2.default.createElement(
                 "div",
                 null,
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   _react2.default.createElement(
                     "strong",
                     null,
@@ -3518,21 +3593,21 @@ var Advanced = function (_React$Component) {
                   )
                 ),
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   packageDetails.version
                 )
               )
             ),
             _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered" },
               _react2.default.createElement(
                 "div",
                 null,
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   _react2.default.createElement(
                     "strong",
                     null,
@@ -3540,21 +3615,21 @@ var Advanced = function (_React$Component) {
                   )
                 ),
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   packageDetails.url
                 )
               )
             ),
             packageDetails.download_url && _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered" },
               _react2.default.createElement(
                 "div",
                 null,
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   _react2.default.createElement(
                     "strong",
                     null,
@@ -3562,21 +3637,21 @@ var Advanced = function (_React$Component) {
                   )
                 ),
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   packageDetails.download_url
                 )
               )
             ),
             _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered" },
               _react2.default.createElement(
                 "div",
                 null,
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   _react2.default.createElement(
                     "strong",
                     null,
@@ -3584,32 +3659,32 @@ var Advanced = function (_React$Component) {
                   )
                 ),
                 _react2.default.createElement(
-                  "p",
-                  null,
+                  "div",
+                  { className: "sk-p" },
                   extType
                 )
               )
             ),
             _react2.default.createElement(
               "div",
-              { className: "panel-row centered" },
+              { className: "sk-panel-row centered sk-horizontal-group" },
               _react2.default.createElement(
                 "div",
-                { onClick: this.confirmInstallation, className: "button info" },
+                { onClick: this.cancelInstallation, className: "sk-button neutral" },
                 _react2.default.createElement(
                   "div",
-                  { className: "label" },
+                  { className: "sk-label" },
+                  "Cancel"
+                )
+              ),
+              _react2.default.createElement(
+                "div",
+                { onClick: this.confirmInstallation, className: "sk-button sk-base" },
+                _react2.default.createElement(
+                  "div",
+                  { className: "sk-label" },
                   "Install"
                 )
-              )
-            ),
-            _react2.default.createElement(
-              "div",
-              { className: "panel-row centered" },
-              _react2.default.createElement(
-                "a",
-                { className: "danger", onClick: this.cancelInstallation },
-                "Cancel"
               )
             )
           )

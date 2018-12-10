@@ -29,8 +29,6 @@ export default class BridgeManager {
     this.componentManager = new ComponentManager([], () => {
       onReady && onReady();
     });
-
-    this.componentManager.acceptsThemes = false;
   }
 
   getItemAppDataValue(item, key) {
