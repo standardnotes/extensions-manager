@@ -32,7 +32,7 @@ export default class ManageInstalled extends React.Component {
 
   category = (title, extensions) => {
     extensions = extensions.sort((a, b) => {
-      return a.content.name > b.content.name;
+      return a.content.name.toLowerCase() < b.content.name.toLowerCase() ? -1 : 1;
     });
     return (
 
