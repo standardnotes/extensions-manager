@@ -43,11 +43,11 @@ export default class InstallRepo extends React.Component {
     return (
       <div id="install-repo" className="sk-panel-section">
         <div className="sk-panel-row centered">
-          <div className="sk-h1"><strong>Enter Your Extended Activation Code</strong></div>
+          <div className="sk-h2"><strong>Enter Your Extended Activation Code</strong></div>
         </div>
-        <div className="sk-notification sk-secondary-contrast dashed one-line">
+        <div className="sk-notification contrast dashed one-line">
           <input
-            className="sk-input sk-secondary-contrast center-text"
+            className="sk-input clear center-text"
             placeholder="Enter Extended Code"
             type="url"
             value={this.state.url}
@@ -68,12 +68,12 @@ export default class InstallRepo extends React.Component {
 
         <div className="sk-panel-row centered">
           <div className="sk-h1 center-text">
-            <strong>Standard Notes Extended</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.
+            <strong className="info">Standard Notes Extended</strong> gives you access to powerful editors, extensions, tools, themes, and cloud backup options.
           </div>
         </div>
         <div className="sk-panel-row" />
         <div className="sk-panel-row centered">
-          <a href="https://standardnotes.org/extensions" target="_blank" className="button info big">
+          <a href="https://standardnotes.org/extensions" target="_blank" className="sk-button info featured">
             <div className="sk-label">
               Learn More
             </div>

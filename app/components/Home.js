@@ -68,28 +68,30 @@ export default class Home extends React.Component {
             <InstallRepo />
           }
 
-          <div className="sk-panel-section no-bottom-pad">
-            {this.state.downloading &&
-              <div>
-                <div className="sk-panel-row justify-left sk-horizontal-group">
-                  <div className="sk-spinner info small"></div>
-                  <p>Refreshing packages...</p>
+          {(this.state.downloading || this.state.validUntil) &&
+            <div className="sk-panel-section no-bottom-pad">
+              {this.state.downloading &&
+                <div>
+                  <div className="sk-panel-row justify-left sk-horizontal-group">
+                    <div className="sk-spinner info small"></div>
+                    <p>Refreshing packages...</p>
+                  </div>
+                  <div className="sk-panel-row"/>
                 </div>
-                <div className="sk-panel-row"/>
-              </div>
-            }
+              }
 
-            {!this.state.downloading && this.state.validUntil &&
-              <div>
-                <div className="sk-panel-row justify-left sk-horizontal-group">
-                  <div className={"sk-circle small " + (this.isExpired() ? "danger" : "success")} />
-                  <p>Your Extended benefits {this.isExpired() ? "expired on" : "are valid until"} {this.state.validUntil.toLocaleString()}</p>
-                  <a className="info" onClick={this.refreshValidUntil}> Refresh </a>
+              {!this.state.downloading && this.state.validUntil &&
+                <div>
+                  <div className="sk-panel-row justify-left sk-horizontal-group">
+                    <div className={"sk-circle small " + (this.isExpired() ? "danger" : "success")} />
+                    <p>Your Extended benefits {this.isExpired() ? "expired on" : "are valid until"} {this.state.validUntil.toLocaleString()}</p>
+                    <a className="info" onClick={this.refreshValidUntil}> Refresh </a>
+                  </div>
+                  <div className="sk-panel-row"/>
                 </div>
-                <div className="sk-panel-row"/>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          }
 
           <ManageInstalled />
 

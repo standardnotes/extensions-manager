@@ -158,7 +158,7 @@ export default class Advanced extends React.Component {
                     <div className="sk-label">Install</div>
                   </div>
                 </div>
-                
+
               </div>
             </div>
           }

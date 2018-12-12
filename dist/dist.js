@@ -2321,7 +2321,7 @@ var Home = function (_React$Component) {
           "div",
           { className: "sk-panel-content" },
           this.state.ready && this.state.repos.length == 0 && _react2.default.createElement(_InstallRepo2.default, null),
-          _react2.default.createElement(
+          (this.state.downloading || this.state.validUntil) && _react2.default.createElement(
             "div",
             { className: "sk-panel-section no-bottom-pad" },
             this.state.downloading && _react2.default.createElement(
@@ -3303,7 +3303,7 @@ var InstallRepo = function (_React$Component) {
           { className: "sk-panel-row centered" },
           _react2.default.createElement(
             "div",
-            { className: "sk-h1" },
+            { className: "sk-h2" },
             _react2.default.createElement(
               "strong",
               null,
@@ -3313,9 +3313,9 @@ var InstallRepo = function (_React$Component) {
         ),
         _react2.default.createElement(
           "div",
-          { className: "sk-notification sk-secondary-contrast dashed one-line" },
+          { className: "sk-notification contrast dashed one-line" },
           _react2.default.createElement("input", {
-            className: "sk-input sk-secondary-contrast center-text",
+            className: "sk-input clear center-text",
             placeholder: "Enter Extended Code",
             type: "url",
             value: this.state.url,
@@ -3344,7 +3344,7 @@ var InstallRepo = function (_React$Component) {
             { className: "sk-h1 center-text" },
             _react2.default.createElement(
               "strong",
-              null,
+              { className: "info" },
               "Standard Notes Extended"
             ),
             " gives you access to powerful editors, extensions, tools, themes, and cloud backup options."
@@ -3356,7 +3356,7 @@ var InstallRepo = function (_React$Component) {
           { className: "sk-panel-row centered" },
           _react2.default.createElement(
             "a",
-            { href: "https://standardnotes.org/extensions", target: "_blank", className: "button info big" },
+            { href: "https://standardnotes.org/extensions", target: "_blank", className: "sk-button info featured" },
             _react2.default.createElement(
               "div",
               { className: "sk-label" },
