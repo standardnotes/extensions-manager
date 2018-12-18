@@ -1281,7 +1281,8 @@ var ManageInstalled = function (_React$Component) {
 
     _this.category = function (title, extensions) {
       extensions = extensions.sort(function (a, b) {
-        return a.content.name.toLowerCase() < b.content.name.toLowerCase() ? -1 : 1;
+        // name can be null in some cases, make sure not to use .toLowerCase without checking first
+        return a.content.name < b.content.name ? -1 : 1;
       });
       return _react2.default.createElement(
         "div",

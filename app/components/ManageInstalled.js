@@ -32,10 +32,10 @@ export default class ManageInstalled extends React.Component {
 
   category = (title, extensions) => {
     extensions = extensions.sort((a, b) => {
-      return a.content.name.toLowerCase() < b.content.name.toLowerCase() ? -1 : 1;
+      // name can be null in some cases, make sure not to use .toLowerCase without checking first
+      return a.content.name < b.content.name ? -1 : 1;
     });
     return (
-
       <div className="sk-panel-section">
         <div className="sk-panel-row" />
         <div className="sk-h4 sk-bold sk-panel-row">{title}</div>
