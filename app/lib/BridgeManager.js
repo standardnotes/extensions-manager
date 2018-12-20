@@ -261,7 +261,7 @@ export default class BridgeManager {
   updateComponent(component) {
     let latestPackageInfo = this.latestPackageInfoForComponent(component);;
 
-    component.content.package_info.download_url = latestPackageInfo.download_url;
+    component.content.package_info = latestPackageInfo;
 
     this.componentManager.saveItems([component], () => {
       this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {

@@ -476,7 +476,7 @@ var BridgeManager = function () {
 
       var latestPackageInfo = this.latestPackageInfoForComponent(component);;
 
-      component.content.package_info.download_url = latestPackageInfo.download_url;
+      component.content.package_info = latestPackageInfo;
 
       this.componentManager.saveItems([component], function () {
         _this5.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {});
