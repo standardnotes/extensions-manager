@@ -1,6 +1,6 @@
 {
   "name": "sn-extensions-manager",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "dist/dist.js",
   "scripts": {
     "lint": "eslint --cache --ignore-path .gitignore --ext .jsx,.js --format=node_modules/eslint-formatter-pretty .",
@@ -47,6 +47,6 @@
     "validate-commit-msg": "2.x",
     "webpack": "^3.8.1",
     "webpack-dev-server": "^2.9.7",
-    "sn-stylekit": "2.0.11"
+    "sn-stylekit": "2.0.13"
   }
 }

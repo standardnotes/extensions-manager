@@ -139,9 +139,25 @@ var BridgeManager = function () {
   _createClass(BridgeManager, [{
     key: "initiateBridge",
     value: function initiateBridge(onReady) {
+      var _this = this;
+
       this.componentManager = new _snComponentsApi2.default([], function () {
+        document.querySelector("html").classList.add(_this.componentManager.platform);
+        _this.reloadScrollBars();
         onReady && onReady();
       });
+    }
+  }, {
+    key: "reloadScrollBars",
+    value: function reloadScrollBars() {
+      // For some reason, scrollbars don't update when the className for this.state.platform is set dynamically.
+      // We're doing everything right, but on Chrome Windows, the scrollbars don't reload if adding className after
+      // the page already loaded. So this seems to work in manually reloading.
+      var container = document.querySelector("body");
+      container.style.display = "none";
+      setTimeout(function () {
+        container.style.display = "block";
+      }, 0);
     }
   }, {
     key: "getItemAppDataValue",
@@ -206,7 +222,7 @@ var BridgeManager = function () {
   }, {
     key: "beginStreamingItems",
     value: function beginStreamingItems() {
-      var _this = this;
+      var _this2 = this;
 
       this._didBeginStreaming = true;
       this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], function (items) {
@@ -219,18 +235,18 @@ var BridgeManager = function () {
             var item = _step2.value;
 
             if (item.deleted) {
-              _this.removeItemFromItems(item);
+              _this2.removeItemFromItems(item);
               continue;
             }
             if (item.isMetadataUpdate) {
               continue;
             }
 
-            var index = _this.indexOfItem(item);
+            var index = _this2.indexOfItem(item);
             if (index >= 0) {
-              _this.items[index] = item;
+              _this2.items[index] = item;
             } else {
-              _this.items.push(item);
+              _this2.items.push(item);
             }
           }
         } catch (err) {
@@ -248,7 +264,7 @@ var BridgeManager = function () {
           }
         }
 
-        _this.notifyObserversOfUpdate();
+        _this2.notifyObserversOfUpdate();
       });
     }
   }, {
@@ -389,10 +405,10 @@ var BridgeManager = function () {
   }, {
     key: "installPackageFromUrl",
     value: function installPackageFromUrl(url, callback) {
-      var _this2 = this;
+      var _this3 = this;
 
       _HttpManager2.default.get().getAbsolute(url, {}, function (response) {
-        _this2.installPackage(response, function (component) {
+        _this3.installPackage(response, function (component) {
           callback(component);
         });
         callback(response);
@@ -412,11 +428,11 @@ var BridgeManager = function () {
   }, {
     key: "saveItems",
     value: function saveItems(items, callback) {
-      var _this3 = this;
+      var _this4 = this;
 
       this.notifyEvent(BridgeManager.EventSaving);
       this.componentManager.saveItems(items, function () {
-        _this3.notifyEvent(BridgeManager.EventDoneSaving);
+        _this4.notifyEvent(BridgeManager.EventDoneSaving);
         callback && callback();
       });
     }
@@ -456,14 +472,14 @@ var BridgeManager = function () {
   }, {
     key: "updateComponent",
     value: function updateComponent(component) {
-      var _this4 = this;
+      var _this5 = this;
 
       var latestPackageInfo = this.latestPackageInfoForComponent(component);;
 
       component.content.package_info.download_url = latestPackageInfo.download_url;
 
       this.componentManager.saveItems([component], function () {
-        _this4.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {});
+        _this5.componentManager.sendCustomEvent("install-local-component", component, function (installedComponent) {});
       });
     }
   }, {

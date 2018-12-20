@@ -27,8 +27,21 @@ export default class BridgeManager {
 
   initiateBridge(onReady) {
     this.componentManager = new ComponentManager([], () => {
+      document.querySelector("html").classList.add(this.componentManager.platform);
+      this.reloadScrollBars();
       onReady && onReady();
     });
+  }
+
+  reloadScrollBars() {
+    // For some reason, scrollbars don't update when the className for this.state.platform is set dynamically.
+    // We're doing everything right, but on Chrome Windows, the scrollbars don't reload if adding className after
+    // the page already loaded. So this seems to work in manually reloading.
+    var container = document.querySelector("body");
+    container.style.display = "none";
+    setTimeout(() => {
+      container.style.display = "block";
+    }, 0);
   }
 
   getItemAppDataValue(item, key) {
