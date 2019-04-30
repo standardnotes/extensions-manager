@@ -34,7 +34,7 @@ export default class Advanced extends React.Component {
     } catch (e) {}
     BridgeManager.get().downloadPackageDetails(url, (response) => {
       if(response.content_type == "SN|Repo") {
-        BridgeManager.get().installRepoUrl(url);
+        BridgeManager.get().addRepo(url);
       } else {
         this.setState({packageDetails: response});
       }
@@ -42,7 +42,7 @@ export default class Advanced extends React.Component {
   }
 
   confirmInstallation = () => {
-    BridgeManager.get().installPackage(this.state.packageDetails, (installed) => {
+    BridgeManager.get().installPackage(this.state.packageDetails).then((installed) => {
       this.setState({url: installed ? null : this.state.url, showForm: !installed, success: installed, packageDetails: null});
     })
   }

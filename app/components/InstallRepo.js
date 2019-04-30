@@ -1,5 +1,4 @@
 import React from 'react';
-import Repo from "../models/Repo.js";
 import RepoController from "../lib/RepoController.js";
 import BridgeManager from "../lib/BridgeManager.js";
 
@@ -21,7 +20,12 @@ export default class InstallRepo extends React.Component {
       url = decoded;
     }
 
-    BridgeManager.get().installRepoUrl(url);
+    if(!url.startsWith("http")) {
+      alert("The code you entered is invalid. Ensure you copied it correctly, and try again.");
+      return;
+    }
+
+    BridgeManager.get().addRepo(url);
     this.setState({url: ""});
   }
 

@@ -16,6 +16,8 @@ module.exports = {
     filename: './[name]'
   },
   devServer: {
+    hot: false,
+    inline: false,
     historyApiFallback: true,
     watchOptions: { aggregateTimeout: 300, poll: 1000 },
     headers: {

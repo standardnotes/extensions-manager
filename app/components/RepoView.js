@@ -1,5 +1,4 @@
 import React from 'react';
-import Repo from "../models/Repo.js";
 import RepoController from "../lib/RepoController.js";
 import BridgeManager from "../lib/BridgeManager.js";
 import PackageView from "./PackageView";
@@ -118,7 +117,7 @@ export default class RepoView extends React.Component {
           <div className="packages sk-panel-table">
             {this.state.packages.map((p, index) =>
               <div className="package sk-panel-table-item">
-                <PackageView key={p.identifier} packageInfo={p} />
+                <PackageView repo={this.props.repo} key={p.identifier} packageInfo={p} />
               </div>
             )}
           </div>

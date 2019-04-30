@@ -1,5 +1,4 @@
 import React from 'react';
-import Repo from "../models/Repo.js";
 import RepoView from "./RepoView.js";
 import BridgeManager from "../lib/BridgeManager.js";
 import InstallRepo from "./InstallRepo";
@@ -37,7 +36,12 @@ export default class Home extends React.Component {
 
   reload() {
     var repos = BridgeManager.get().installedRepos;
-    this.setState({repos: repos});
+    this.setState({
+      repos: repos,
+      expired: !this.state.validUntil || this.state.validUntil < new Date(),
+      // When deleting a repo valid until isn't refreshed, so we do it this way.
+      validUntil: repos.length > 0 ? this.state.validUntil : null
+    });
 
     if(repos.length > 0 && !BridgeManager.get().didBeginStreaming()) {
       BridgeManager.get().beginStreamingItems();
@@ -54,10 +58,6 @@ export default class Home extends React.Component {
     if(ref && !this.repoRefs.includes(ref)) {
       this.repoRefs.push(ref);
     }
-  }
-
-  isExpired = () => {
-    return !this.state.validUntil || this.state.validUntil < new Date();
   }
 
   render() {
@@ -83,8 +83,8 @@ export default class Home extends React.Component {
               {!this.state.downloading && this.state.validUntil &&
                 <div>
                   <div className="sk-panel-row justify-left sk-horizontal-group">
-                    <div className={"sk-circle small " + (this.isExpired() ? "danger" : "success")} />
-                    <p>Your Extended benefits {this.isExpired() ? "expired on" : "are valid until"} {this.state.validUntil.toLocaleString()}</p>
+                    <div className={"sk-circle small " + (this.state.expired ? "danger" : "success")} />
+                    <p>Your Extended benefits {this.state.expired ? "expired on" : "are valid until"} {this.state.validUntil.toLocaleString()}</p>
                     <a className="info" onClick={this.refreshValidUntil}> Refresh </a>
                   </div>
                   <div className="sk-panel-row"/>

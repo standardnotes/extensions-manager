@@ -7,7 +7,7 @@ export default class RepoController {
   }
 
   getPackages(callback) {
-    HttpManager.get().getAbsolute(this.repo.url, {}, (response) => {
+    HttpManager.get().getAbsolute(this.repo.content.url, {}, (response) => {
       this.response = response;
       callback(response);
     }, (error) => {

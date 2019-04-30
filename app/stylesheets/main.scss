@@ -41,6 +41,31 @@ a.sk-button  {
       background-color: transparent;
     }
   }
+
+  .package-desc {
+    white-space: pre-line;
+  }
+
+  .package-flags {
+    display: flex;
+    flex-direction: row;
+    margin-top: 4px;
+
+    .package-flag {
+      display: inline-block;
+      vertical-align: middle;
+      padding: 3px 5px;
+      font-size: 10px;
+      line-height: 11px;
+      background-color: var(--sn-stylekit-info-color);
+      color: var(--sn-stylekit-info-contrast-color);
+      border-radius: var(--sn-stylekit-general-border-radius);
+      font-weight: 600;
+      &:not(:last-child) {
+        margin-right: 5px;
+      }
+    }
+  }
 }
 
 .item-advanced-options {

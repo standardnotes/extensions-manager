@@ -30,6 +30,26 @@ a.sk-button {
     color: var(--sn-stylekit-foreground-color);
     background-color: transparent; }
 
+.package .package-desc {
+  white-space: pre-line; }
+
+.package .package-flags {
+  display: flex;
+  flex-direction: row;
+  margin-top: 4px; }
+  .package .package-flags .package-flag {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 3px 5px;
+    font-size: 10px;
+    line-height: 11px;
+    background-color: var(--sn-stylekit-info-color);
+    color: var(--sn-stylekit-info-contrast-color);
+    border-radius: var(--sn-stylekit-general-border-radius);
+    font-weight: 600; }
+    .package .package-flags .package-flag:not(:last-child) {
+      margin-right: 5px; }
+
 .item-advanced-options {
   margin-top: 15px; }
   .item-advanced-options label {
@@ -45,7 +65,7 @@ input.disguised {
   margin-top: -8px !important; }
 
 :root {
-  --sn-stylekit-base-font-size: 14px;
+  --sn-stylekit-base-font-size: 13px;
   --sn-stylekit-font-size-p: 1.0rem;
   --sn-stylekit-font-size-editor: 1.21rem;
   --sn-stylekit-font-size-h6: 0.8rem;
@@ -553,7 +573,9 @@ input.disguised {
 .sn-component .sk-segmented-buttons .sk-button, .sn-component .sk-segmented-buttons .sk-box {
   border-radius: 0;
   white-space: nowrap;
-  margin: 0; }
+  margin: 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important; }
 
 .sn-component .sk-segmented-buttons .sk-button:not(:last-child), .sn-component .sk-segmented-buttons .sk-box:not(:last-child) {
   border-right: none;

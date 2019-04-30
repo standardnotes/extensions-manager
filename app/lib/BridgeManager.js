@@ -1,5 +1,4 @@
 import ComponentManager from 'sn-components-api';
-import Repo from "../models/Repo.js";
 import HttpManager from "./HttpManager";
 
 export default class BridgeManager {
@@ -18,6 +17,8 @@ export default class BridgeManager {
     BridgeManager.EventDoneDownloadingPackages = "EventDoneDownloadingPackages";
     BridgeManager.EventUpdatedValidUntil = "EventUpdatedValidUntil";
 
+    BridgeManager.ExtensionRepoContentType = "SN|ExtensionRepo";
+
     this.updateObservers = [];
     this.items = [];
     this.packages = [];
@@ -29,6 +30,8 @@ export default class BridgeManager {
     this.componentManager = new ComponentManager([], () => {
       document.querySelector("html").classList.add(this.componentManager.platform);
       this.reloadScrollBars();
+      this.migrateInnateReposToExtensionRepoObjects();
+
       onReady && onReady();
     });
   }
@@ -76,7 +79,8 @@ export default class BridgeManager {
 
   beginStreamingItems() {
     this._didBeginStreaming = true;
-    this.componentManager.streamItems(["SN|Component", "SN|Theme", "SF|Extension", "Extension"], (items) => {
+    let contentTypes = ["SN|Component", "SN|Theme", "SF|Extension", "Extension", BridgeManager.ExtensionRepoContentType];
+    this.componentManager.streamItems(contentTypes, (items) => {
       for(var item of items) {
         if(item.deleted) {
           this.removeItemFromItems(item);
@@ -113,7 +117,9 @@ export default class BridgeManager {
   }
 
   allInstalled() {
-    return this.items;
+    return this.items.filter((item) => {
+      return item.content_type != BridgeManager.ExtensionRepoContentType;
+    });
   }
 
   notifyObserversOfUpdate() {
@@ -133,23 +139,45 @@ export default class BridgeManager {
     }
   }
 
-  get installedRepos() {
-    var urls = this.componentManager.componentDataValueForKey("repos") || [];
-    return urls.map((url) => {return new Repo(url)});
+  // April 2019: We're migrating repos from being a component data value
+  // to their own separate objects. This way, repos aren't tied down to the Extensions installation.
+  migrateInnateReposToExtensionRepoObjects() {
+    let urls = this.componentManager.componentDataValueForKey("repos") || [];
+    if(urls.length == 0) {
+      return;
+    }
+    this.addRepos(urls).then(() => {
+      this.componentManager.setComponentDataValueForKey("repos", null);
+      this.notifyObserversOfUpdate();
+    })
   }
 
-  installRepoUrl(url) {
-    var urls = this.installedRepos.map((repo) => {return repo.url});
-    urls.push(url);
-    this.componentManager.setComponentDataValueForKey("repos", urls);
-    this.notifyObserversOfUpdate();
+  async addRepo(url) {
+    return this.addRepos([url]);
+  }
+
+  async addRepos(urls) {
+    let itemParams = [];
+    for(let url of urls) {
+      itemParams.push({
+        content_type: BridgeManager.ExtensionRepoContentType,
+        content: { url: url }
+      })
+    }
+
+    return new Promise((resolve, reject) => {
+      this.componentManager.createItems(itemParams, (createdItems) => {
+        resolve(createdItems);
+      });
+    })
+  }
+
+  get installedRepos() {
+    return this.items.filter((item) => item.content_type == BridgeManager.ExtensionRepoContentType);
   }
 
   uninstallRepo(repo) {
-    var urls = this.componentManager.componentDataValueForKey("repos") || [];
-    urls.splice(urls.indexOf(repo.url), 1);
-    this.componentManager.setComponentDataValueForKey("repos", urls);
-    this.notifyObserversOfUpdate();
+    this.componentManager.deleteItem(repo);
   }
 
   localComponentInstallationAvailable() {
@@ -203,7 +231,7 @@ export default class BridgeManager {
 
   installPackageFromUrl(url, callback) {
     HttpManager.get().getAbsolute(url, {}, (response) => {
-      this.installPackage(response, (component) => {
+      this.installPackage(response).then((component) => {
         callback(component);
       })
       callback(response);
@@ -213,11 +241,13 @@ export default class BridgeManager {
     })
   }
 
-  installPackage(aPackage, callback) {
-    let data = this.createComponentDataForPackage(aPackage);
-    this.componentManager.createItem(data, (component) => {
-      callback && callback(component);
-    });
+  async installPackage(aPackage, repo) {
+    return new Promise((resolve, reject) => {
+      let data = this.createComponentDataForPackage(aPackage, repo);
+      this.componentManager.createItem(data, (component) => {
+        resolve(component);
+      });
+    })
   }
 
   saveItems(items, callback) {
@@ -228,7 +258,7 @@ export default class BridgeManager {
     })
   }
 
-  createComponentDataForPackage(aPackage) {
+  createComponentDataForPackage(aPackage, repo) {
     return {
       content_type: aPackage.content_type,
       content: {
@@ -239,7 +269,8 @@ export default class BridgeManager {
         local_url: null,
         area: aPackage.area,
         package_info: aPackage,
-        valid_until: aPackage.valid_until
+        valid_until: aPackage.valid_until,
+        references: repo ? [{content_type: repo.content_type, uuid: repo.uuid}] : []
       }
     };
   }
@@ -250,8 +281,11 @@ export default class BridgeManager {
   }
 
   uninstallComponent(component) {
-    if(component.uuid == BridgeManager.get().getSelfComponentUUID()) {
-      if(!confirm("You are uninstalling the Extensions manager. After it has been uninstalled, please reload the application, and a new installation will be created.")) {
+    let isSelf = component.uuid == BridgeManager.get().getSelfComponentUUID();
+    let warning = component.content.package_info && component.content.package_info.deletion_warning;
+    if(isSelf || warning) {
+      let message = warning ? warning : "You are uninstalling the Extensions manager. After it has been uninstalled, please reload the application, and a new installation will be created.";
+      if(!confirm(message)) {
         return;
       }
     }
@@ -267,11 +301,6 @@ export default class BridgeManager {
       this.componentManager.sendCustomEvent("install-local-component", component, (installedComponent) => {
       });
     })
-  }
-
-  uninstallPackageOffline(aPackage) {
-    let item = this.itemForPackage(aPackage, true);
-    this.componentManager.deleteItem(item);
   }
 
   toggleOpenEvent(component) {

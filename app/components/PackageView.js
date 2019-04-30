@@ -1,5 +1,4 @@
 import React from 'react';
-import Repo from "../models/Repo.js";
 import RepoController from "../lib/RepoController.js";
 import BridgeManager from "../lib/BridgeManager.js";
 var compareVersions = require('compare-versions');
@@ -23,7 +22,7 @@ export default class PackageView extends React.Component {
       if(BridgeManager.get().isPackageInstalled(this.packageInfo)) {
         BridgeManager.get().uninstallPackage(this.packageInfo);
       } else {
-        BridgeManager.get().installPackage(this.packageInfo);
+        BridgeManager.get().installPackage(this.packageInfo, this.props.repo);
       }
     }
   }
@@ -133,6 +132,7 @@ export default class PackageView extends React.Component {
     }
 
     let displayName = component ? component.content.name : packageInfo.name;
+    let flags = packageInfo.flags || [];
 
     return [
         <div className="sk-panel-table-item-content">
@@ -150,6 +150,16 @@ export default class PackageView extends React.Component {
               onKeyPress={this.handleKeyPress}
               onChange={this.handleChange}
             />
+
+            {flags.length > 0 &&
+              <div className="package-flags">
+                {flags.map((flag) =>
+                  <div className="package-flag">
+                    {flag}
+                  </div>
+                )}
+              </div>
+            }
 
             {component && installError &&
               <div className="sk-notification warning package-notification">
@@ -173,7 +183,7 @@ export default class PackageView extends React.Component {
 
             {!this.props.hideMeta &&
               <div className="sk-panel-row">
-                <div className="sk-p">{packageInfo.description}</div>
+                <div className="sk-p package-desc">{packageInfo.description}</div>
               </div>
             }
           </div>
