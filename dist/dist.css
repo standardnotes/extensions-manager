@@ -100,13 +100,16 @@ input.disguised {
   --sn-stylekit-editor-background-color: var(--sn-stylekit-background-color);
   --sn-stylekit-editor-foreground-color: var(--sn-stylekit-foreground-color);
   --sn-stylekit-paragraph-text-color: #454545;
-  --sn-stylekit-input-placeholder-color: #a8a8a8;
+  --sn-stylekit-input-placeholder-color: rgb(168, 168, 168);
   --sn-stylekit-input-border-color: #e3e3e3;
   --sn-stylekit-scrollbar-thumb-color: #dfdfdf;
   --sn-stylekit-scrollbar-track-border-color: #E7E7E7;
   --sn-stylekit-general-border-radius: 2px;
   --sn-stylekit-monospace-font: "Ubuntu Mono", courier, monospace;
-  --sn-stylekit-sans-serif-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; }
+  --sn-stylekit-sans-serif-font: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif; }
 
 .sn-component {
   font-family: var(--sn-stylekit-sans-serif-font);
@@ -114,10 +117,10 @@ input.disguised {
   color: var(--sn-stylekit-foreground-color); }
 
 .sn-component .sk-panel {
-  box-shadow: 0px 2px 13px var(--sn-stylekit-shadow-color);
+  box-shadow: 0px 2px 5px var(--sn-stylekit-shadow-color);
   background-color: var(--sn-stylekit-background-color);
-  border: 1px solid var(--sn-stylekit-contrast-border-color);
-  border-radius: 0.7rem;
+  border: 1px solid var(--sn-stylekit-border-color);
+  border-radius: var(--sn-stylekit-general-border-radius);
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -137,8 +140,9 @@ input.disguised {
   display: flex;
   justify-content: space-between;
   padding: 1.1rem 2rem;
-  border-bottom: 1px solid var(--sn-stylekit-border-color);
+  border-bottom: 1px solid var(--sn-stylekit-contrast-border-color);
   background-color: var(--sn-stylekit-contrast-background-color);
+  color: var(--sn-stylekit-contrast-foreground-color);
   align-items: center; }
 
 .sn-component .sk-panel .sk-panel-header .sk-panel-header-title {
@@ -281,7 +285,7 @@ input.disguised {
 .sn-component .sk-menu-panel {
   background-color: var(--sn-stylekit-background-color);
   border: 1px solid var(--sn-stylekit-contrast-border-color);
-  border-radius: 0.6rem;
+  border-radius: var(--sn-stylekit-general-border-radius);
   overflow: scroll;
   user-select: none;
   overflow-y: auto !important;
@@ -289,8 +293,9 @@ input.disguised {
 
 .sn-component .sk-menu-panel .sk-menu-panel-header {
   padding: 0.8rem 1rem;
-  border-bottom: 1px solid var(--sn-stylekit-border-color);
+  border-bottom: 1px solid var(--sn-stylekit-contrast-border-color);
   background-color: var(--sn-stylekit-contrast-background-color);
+  color: var(--sn-stylekit-contrast-foreground-color);
   display: flex;
   justify-content: space-between;
   align-items: center; }
@@ -312,7 +317,9 @@ input.disguised {
   border-bottom: 1px solid var(--sn-stylekit-border-color); }
 
 .sn-component .sk-menu-panel .sk-menu-panel-row:hover {
-  background-color: var(--sn-stylekit-contrast-background-color); }
+  background-color: var(--sn-stylekit-contrast-background-color);
+  color: var(--sn-stylekit-contrast-foreground-color);
+  border-color: var(--sn-stylekit-contrast-border-color); }
 
 .sn-component .sk-menu-panel .sk-menu-panel-row .sk-menu-panel-column {
   display: flex;
@@ -1796,14 +1803,18 @@ input.disguised {
   height: 2rem;
   padding: 0.0rem 0.8rem;
   background-color: var(--sn-stylekit-contrast-background-color);
+  color: var(--sn-stylekit-contrast-foreground-color);
   justify-content: space-between;
   align-items: center;
-  border: 1px solid var(--sn-stylekit-border-color);
+  border: 1px solid var(--sn-stylekit-contrast-border-color);
   user-select: none; }
 
 .sn-component .sk-app-bar.no-edges {
   border-left: 0;
   border-right: 0; }
+
+.sn-component .sk-app-bar.no-bottom-edge {
+  border-bottom: 0; }
 
 .sn-component .sk-app-bar .left, .sn-component .sk-app-bar .right {
   display: flex;
@@ -1915,7 +1926,7 @@ textarea,
 
 .windows-web ::-webkit-scrollbar-thumb, .windows-desktop ::-webkit-scrollbar-thumb, .linux-web ::-webkit-scrollbar-thumb, .linux-desktop ::-webkit-scrollbar-thumb {
   height: 6px;
-  border: 4px solid transparent;
+  border: 4px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
   -webkit-border-radius: 10px;
   background-color: var(--sn-stylekit-scrollbar-thumb-color);
