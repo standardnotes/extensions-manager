@@ -134,6 +134,7 @@ export default class BridgeManager {
       }
     } else {
       if(this.size != "short") {
+        this.size = "short";
         this.componentManager.setSize("container", 800, 500);
       }
     }

@@ -50,7 +50,7 @@ export default class RepoView extends React.Component {
         var needsSave = false;
         let validUntil = new Date(packageInfo.valid_until);
         // .getTime() must be used to compare dates
-        if(packageInfo.valid_until && (!installed.content.valid_until || (installed.content.valid_until.getTime() !== validUntil.getTime()))) {
+        if(packageInfo.valid_until && (!installed.content.valid_until || (new Date(installed.content.valid_until).getTime() !== validUntil.getTime()))) {
           installed.content.valid_until = validUntil;
           needsSave = true;
         }
