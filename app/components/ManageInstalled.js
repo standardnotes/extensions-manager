@@ -40,7 +40,7 @@ export default class ManageInstalled extends React.Component {
         <div className="sk-panel-row" />
         <div className="sk-h4 sk-bold sk-panel-row">{title}</div>
         <div className="sk-panel-row" />
-        <div className="packages sk-panel-table sk-panel-row">
+        <div className="packages sk-panel-table">
           {extensions.map((ext, index) =>
             <div className="package sk-panel-table-item">
               <PackageView key={ext.uuid} component={ext} hideMeta={true} />
