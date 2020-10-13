@@ -1465,7 +1465,7 @@ function (_React$Component) {
       }, title), __WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
         className: "sk-panel-row"
       }), __WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
-        className: "packages sk-panel-table sk-panel-row"
+        className: "packages sk-panel-table"
       }, extensions.map(function (ext, index) {
         return __WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
           className: "package sk-panel-table-item"
