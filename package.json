@@ -16,6 +16,7 @@
     "main": "dist/index.html"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
     "@babel/core": "^7.4.3",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
@@ -24,7 +25,6 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-stage-0": "^7.0.0",
     "@babel/runtime": "^7.4.4",
-    "@babel/cli": "^7.6.4",
     "babel-loader": "^8.0.5",
     "babel-register": "^6.26.0",
     "compare-versions": "^3.1.0",
@@ -32,7 +32,7 @@
     "css-loader": "~3.2.0",
     "extract-text-webpack-plugin": "^3.0.2",
     "husky": "^0.12.0",
-    "node-sass": "^4.6.0",
+    "node-sass": "^4.14.1",
     "react": "16.x",
     "react-dom": "16.x",
     "sass-loader": "^6.0.6",
