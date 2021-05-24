@@ -98,9 +98,7 @@ export default class RepoView extends React.Component {
   };
 
   deleteRepo = () => {
-    if (confirm("Are you sure you want to delete this repository?")) {
-      BridgeManager.get().uninstallRepo(this.props.repo);
-    }
+    BridgeManager.get().uninstallRepo(this.props.repo);
   };
 
   render() {
