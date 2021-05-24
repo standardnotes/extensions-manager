@@ -36,6 +36,7 @@ export default class Advanced extends React.Component {
       } else {
         this.setState({ packageDetails: response });
       }
+      this.setState({ url: '' });
     });
   }
 
