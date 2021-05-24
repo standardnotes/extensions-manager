@@ -2,7 +2,7 @@
   "name": "sn-extensions-manager",
   "version": "1.2.4",
   "engines": {
-    "node": ">=10.20.1 <12.0"
+    "node": ">=10.20.1 <=15.14.0"
   },
   "main": "dist/dist.js",
   "scripts": {
