@@ -134,10 +134,6 @@ export default class PackageView extends React.Component {
     let displayName = component ? component.content.name : packageInfo.name;
     let flags = packageInfo.flags || [];
 
-    if (flags.includes("Deprecated")) {
-      return;
-    }
-
     return [
         <div className="sk-panel-table-item-content">
           <div className="sk-panel-table-item-column stretch">
