@@ -1209,6 +1209,11 @@ var PackageView = /*#__PURE__*/function (_React$Component) {
 
       var displayName = component ? component.content.name : packageInfo.name;
       var flags = packageInfo.flags || [];
+
+      if (flags.includes("Deprecated")) {
+        return;
+      }
+
       return [/*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
         className: "sk-panel-table-item-content"
       }, /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
