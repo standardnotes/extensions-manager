@@ -1209,11 +1209,6 @@ var PackageView = /*#__PURE__*/function (_React$Component) {
 
       var displayName = component ? component.content.name : packageInfo.name;
       var flags = packageInfo.flags || [];
-
-      if (flags.includes("Deprecated")) {
-        return;
-      }
-
       return [/*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
         className: "sk-panel-table-item-content"
       }, /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
@@ -2200,8 +2195,21 @@ var RepoView = /*#__PURE__*/function (_React$Component) {
       this.repoController.getPackages(function (response) {
         __WEBPACK_IMPORTED_MODULE_9__lib_BridgeManager_js__["a" /* default */].get().notifyEvent(__WEBPACK_IMPORTED_MODULE_9__lib_BridgeManager_js__["a" /* default */].EventDoneDownloadingPackages);
 
+        var isDeprecatedPackage = function isDeprecatedPackage(item) {
+          var _item$flags;
+
+          var flags = (_item$flags = item.flags) !== null && _item$flags !== void 0 ? _item$flags : [];
+          flags = flags.map(function (flag) {
+            return flag.toLowerCase();
+          });
+          return flags.includes("deprecated");
+        };
+
         if (response) {
-          var packages = response.packages;
+          var packages = response.packages || [];
+          packages = packages.filter(function (item) {
+            return !isDeprecatedPackage(item);
+          });
           var valid_until = new Date(response.valid_until);
           __WEBPACK_IMPORTED_MODULE_9__lib_BridgeManager_js__["a" /* default */].get().notifyEvent(__WEBPACK_IMPORTED_MODULE_9__lib_BridgeManager_js__["a" /* default */].EventUpdatedValidUntil, {
             valid_until: valid_until
@@ -2209,7 +2217,7 @@ var RepoView = /*#__PURE__*/function (_React$Component) {
           __WEBPACK_IMPORTED_MODULE_9__lib_BridgeManager_js__["a" /* default */].get().registerPackages(packages);
 
           _this2.setState({
-            packages: packages || []
+            packages: packages
           });
 
           if (_this2.receivedBridgeItems) {
