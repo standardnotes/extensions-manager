@@ -28,14 +28,25 @@ export default class RepoView extends React.Component {
       BridgeManager.get().notifyEvent(
         BridgeManager.EventDoneDownloadingPackages
       );
+
+      const isDeprecatedPackage = (item) => {
+        let flags = item.flags ?? [];
+        flags = flags.map((flag) => flag.toLowerCase());
+        return flags.includes("deprecated");
+      };
+
       if (response) {
-        var packages = response.packages;
-        var valid_until = new Date(response.valid_until);
+        let packages = response.packages || [];
+        packages = packages.filter((item) => !isDeprecatedPackage(item));
+
+        const valid_until = new Date(response.valid_until);
         BridgeManager.get().notifyEvent(BridgeManager.EventUpdatedValidUntil, {
           valid_until,
         });
+
         BridgeManager.get().registerPackages(packages);
-        this.setState({ packages: packages || [] });
+        this.setState({ packages });
+
         if (this.receivedBridgeItems) {
           this.updateComponentsWithNewPackageInfo();
         }

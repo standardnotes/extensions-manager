@@ -1,6 +1,6 @@
 {
   "name": "sn-extensions-manager",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "engines": {
     "node": ">=10.20.1 <=15.14.0"
   },
