@@ -23,20 +23,40 @@ export default class Advanced extends React.Component {
     this.setState({ showForm: !this.state.showForm, success: false });
   };
 
-  downloadPackage(url) {
+  getRealUrl(url) {
     try {
-      const decoded = window.atob(url);
+      const decoded = atob(url);
       if (decoded) {
-        url = decoded;
+        return new URL(decoded);
       }
-    } catch (e) {}
-    BridgeManager.get().downloadPackageDetails(url, (response) => {
-      if (response.content_type == "SN|Repo") {
+    } catch (e) {
+      return url;
+    }
+  }
+
+  downloadPackage(url) {
+    url = this.getRealUrl(url);
+
+    BridgeManager.get().downloadPackageDetails(url, (response, error) => {
+      if (!response || error) {
+        this.setState({
+          downloadPackageFail: true,
+        });
+        return;
+      }
+
+      if (response.content_type === "SN|Repo") {
         BridgeManager.get().addRepo(url);
       } else {
-        this.setState({ packageDetails: response });
+        this.setState({
+          packageDetails: response
+        });
       }
-      this.setState({ url: '' });
+
+      this.setState({
+        downloadPackageFail: false,
+        url: ''
+      });
     });
   }
 
@@ -58,17 +78,16 @@ export default class Advanced extends React.Component {
   };
 
   handleInputChange = (event) => {
-    this.setState({ url: event.target.value });
+    this.setState({
+      url: event.target.value,
+      downloadPackageFail: false,
+    });
   };
 
   handleKeyPress = (e) => {
     if (e.key === "Enter") {
       this.downloadPackage(this.state.url);
     }
-  };
-
-  handleInputChange = (event) => {
-    this.setState({ url: event.target.value });
   };
 
   render() {
@@ -92,6 +111,14 @@ export default class Advanced extends React.Component {
           <div className="sk-panel-row justify-right">
             <div className="sk-p success">
               Extension successfully installed.
+            </div>
+          </div>
+        )}
+
+        {this.state.downloadPackageFail && (
+          <div className="sk-panel-row justify-right">
+            <div className="sk-p danger">
+              Error downloading package details. Please check the Extension Link and try again.
             </div>
           </div>
         )}
