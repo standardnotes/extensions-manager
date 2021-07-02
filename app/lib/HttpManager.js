@@ -20,35 +20,39 @@ export default class HttpManager {
   }
 
   httpRequest(verb, url, params, onsuccess, onerror) {
-
-    var xmlhttp = new XMLHttpRequest();
+    const xmlhttp = new XMLHttpRequest();
 
     xmlhttp.onreadystatechange = function() {
-      if (xmlhttp.readyState == 4) {
-        var response = xmlhttp.responseText;
-        if(response) {
+      if (xmlhttp.readyState === 4) {
+        let response = xmlhttp.responseText;
+
+        if (response) {
           try {
             response = JSON.parse(response);
-          } catch(e) {}
+          } catch(e) {
+            // If parsing fails, it means the response is not a JSON string
+            // and we should return undefined.
+            response = undefined;
+          }
         }
 
-       if(xmlhttp.status >= 200 && xmlhttp.status <= 299){
-         onsuccess(response);
-       } else {
-         console.error("Request error:", response);
-         onerror(response);
-       }
-     }
-   }.bind(this)
+        if (xmlhttp.status >= 200 && xmlhttp.status <= 299) {
+          onsuccess(response);
+        } else {
+          console.error("Request error:", response);
+          onerror(response);
+        }
+      }
+    }.bind(this);
 
-    if(verb == "get" && Object.keys(params).length > 0) {
+    if (verb === "get" && Object.keys(params).length > 0) {
       url = url + this.formatParams(params);
     }
 
     xmlhttp.open(verb, url, true);
     xmlhttp.setRequestHeader('Content-type', 'application/json');
 
-    if(verb == "post" || verb == "patch") {
+    if (verb === "post" || verb === "patch") {
       xmlhttp.send(JSON.stringify(params));
     } else {
       xmlhttp.send();
