@@ -956,13 +956,17 @@ var HttpManager = /*#__PURE__*/function () {
       var xmlhttp = new XMLHttpRequest();
 
       xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4) {
+        if (xmlhttp.readyState === 4) {
           var response = xmlhttp.responseText;
 
           if (response) {
             try {
               response = JSON.parse(response);
-            } catch (e) {}
+            } catch (e) {
+              // If parsing fails, it means the response is not a JSON string
+              // and we should return undefined.
+              response = undefined;
+            }
           }
 
           if (xmlhttp.status >= 200 && xmlhttp.status <= 299) {
@@ -974,14 +978,14 @@ var HttpManager = /*#__PURE__*/function () {
         }
       }.bind(this);
 
-      if (verb == "get" && Object.keys(params).length > 0) {
+      if (verb === "get" && Object.keys(params).length > 0) {
         url = url + this.formatParams(params);
       }
 
       xmlhttp.open(verb, url, true);
       xmlhttp.setRequestHeader('Content-type', 'application/json');
 
-      if (verb == "post" || verb == "patch") {
+      if (verb === "post" || verb === "patch") {
         xmlhttp.send(JSON.stringify(params));
       } else {
         xmlhttp.send();
@@ -4180,7 +4184,8 @@ var Advanced = /*#__PURE__*/function (_React$Component) {
 
     __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_2__babel_runtime_helpers_assertThisInitialized___default()(_this), "handleInputChange", function (event) {
       _this.setState({
-        url: event.target.value
+        url: event.target.value,
+        downloadPackageFail: false
       });
     });
 
@@ -4188,12 +4193,6 @@ var Advanced = /*#__PURE__*/function (_React$Component) {
       if (e.key === "Enter") {
         _this.downloadPackage(_this.state.url);
       }
-    });
-
-    __WEBPACK_IMPORTED_MODULE_6__babel_runtime_helpers_defineProperty___default()(__WEBPACK_IMPORTED_MODULE_2__babel_runtime_helpers_assertThisInitialized___default()(_this), "handleInputChange", function (event) {
-      _this.setState({
-        url: event.target.value
-      });
     });
 
     _this.state = {
@@ -4217,20 +4216,34 @@ var Advanced = /*#__PURE__*/function (_React$Component) {
       this.forceUpdate();
     }
   }, {
+    key: "getRealUrl",
+    value: function getRealUrl(url) {
+      try {
+        var decoded = atob(url);
+
+        if (decoded) {
+          return new URL(decoded);
+        }
+      } catch (e) {
+        return url;
+      }
+    }
+  }, {
     key: "downloadPackage",
     value: function downloadPackage(url) {
       var _this2 = this;
 
-      try {
-        var decoded = window.atob(url);
+      url = this.getRealUrl(url);
+      __WEBPACK_IMPORTED_MODULE_8__lib_BridgeManager__["a" /* default */].get().downloadPackageDetails(url, function (response, error) {
+        if (!response || error) {
+          _this2.setState({
+            downloadPackageFail: true
+          });
 
-        if (decoded) {
-          url = decoded;
+          return;
         }
-      } catch (e) {}
 
-      __WEBPACK_IMPORTED_MODULE_8__lib_BridgeManager__["a" /* default */].get().downloadPackageDetails(url, function (response) {
-        if (response.content_type == "SN|Repo") {
+        if (response.content_type === "SN|Repo") {
           __WEBPACK_IMPORTED_MODULE_8__lib_BridgeManager__["a" /* default */].get().addRepo(url);
         } else {
           _this2.setState({
@@ -4239,6 +4252,7 @@ var Advanced = /*#__PURE__*/function (_React$Component) {
         }
 
         _this2.setState({
+          downloadPackageFail: false,
           url: ''
         });
       });
@@ -4264,7 +4278,11 @@ var Advanced = /*#__PURE__*/function (_React$Component) {
         className: "sk-panel-row justify-right"
       }, /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
         className: "sk-p success"
-      }, "Extension successfully installed.")), this.state.showForm && /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
+      }, "Extension successfully installed.")), this.state.downloadPackageFail && /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
+        className: "sk-panel-row justify-right"
+      }, /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
+        className: "sk-p danger"
+      }, "Error downloading package details. Please check the Extension Link and try again.")), this.state.showForm && /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("div", {
         className: "sk-panel-row"
       }, /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_7_react___default.a.createElement("input", {
         className: "sk-input contrast",
